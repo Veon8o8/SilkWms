@@ -17,6 +17,7 @@ import { LOCAL_STORAGE } from '../config/keys';
 import { DepartmentType, ErrResponse, PositionType, SucResponse } from '../config/type';
 import { timeUtil } from '../utils/TimeUtil';
 import { ProductInfo } from '../page/basic.info/product.info/frame';
+import { ProductProperty } from '../page/basic.info/product.property/frame';
 const { Content } = Layout;
 
 type MenuMode = 'vertical' | 'inline';
@@ -168,6 +169,12 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
                             headerHeight={headerHeight}
                             departmentList={this.state.departmentList}
                             positionList={this.state.positionList}
+                        />
+                    )
+                case MENU_KEY.ProductProperty:
+                    return (
+                        <ProductProperty
+                            headerHeight={headerHeight}
                         />
                     )
                 case MENU_KEY.ProductInfo:

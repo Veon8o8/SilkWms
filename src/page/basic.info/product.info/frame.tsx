@@ -153,7 +153,7 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
     // 分类统计数据
     categoryStats: CategoryStat[] = [
         { key: 'finished', title: '成品（生产）', count: 17, icon: <AppstoreOutlined />, color: '#1890ff', tabKey: 'finished' },
-        { key: 'raw', title: '原料', count: '99+', icon: <DatabaseOutlined />, color: '#fa8c16', tabKey: 'raw' },
+        { key: 'raw', title: '原料', count: 99, icon: <DatabaseOutlined />, color: '#fa8c16', tabKey: 'raw' },
         { key: 'spare', title: '备件', count: 5, icon: <ToolOutlined />, color: '#722ed1', tabKey: 'spare' },
         { key: 'waste', title: '废料', count: 3, icon: <WasteOutlined />, color: '#f5222d', tabKey: 'waste' },
         { key: 'plan', title: '计划成品', count: 2, icon: <ScheduleOutlined />, color: '#13c2c2', tabKey: 'plan' },
@@ -361,7 +361,10 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
                             添加
                         </Button>
                         <Button icon={<ImportOutlined />} onClick={this.handleImport}>
-                            导入导出
+                            导入
+                        </Button>
+                        <Button icon={<ExportOutlined />} onClick={this.handleImport}>
+                            导出
                         </Button>
                         <Button icon={<DeleteOutlined />} onClick={this.handleDelete} danger>
                             删除
