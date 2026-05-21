@@ -4,6 +4,7 @@ import {
     // 子菜单图标
     BarChartOutlined,      // 仓储统计
     TableOutlined,         // 出入库明细
+    AppstoreOutlined,
     ProductOutlined,       // 产品信息
     ShopOutlined,     // 仓库信息
     EnvironmentOutlined,   // 仓位信息
@@ -27,15 +28,16 @@ export const MENU_KEY = {
     // 基础信息维护
     BaseInfo: "BaseInfo",
     // 基础信息维护 - 子菜单
-    ProductInfo: "ProductInfo",     // 产品信息
-    WarehouseInfo: "WarehouseInfo", // 仓库信息
-    LocationInfo: "LocationInfo",   // 仓位信息
+    ProductProperty: "ProductProperty", // 产品属性
+    ProductInfo: "ProductInfo",         // 产品信息
+    WarehouseInfo: "WarehouseInfo",     // 仓库信息
+    LocationInfo: "LocationInfo",       // 仓位信息
 
     // 产品出入库管理
     ProductInOut: "ProductInOut",
     // 产品出入库管理 - 子菜单
-    InboundOrder: "InboundOrder",   // 入库单
-    OutboundOrder: "OutboundOrder", // 出库单
+    InboundOrder: "InboundOrder",       // 入库单
+    OutboundOrder: "OutboundOrder",     // 出库单
 
     // 库存调拨管理
     StockTransfer: "StockTransfer",
@@ -62,6 +64,7 @@ export const SUBMENU = [
         { key: MENU_KEY.InOutDetails, label: 'in-out-details', icon: TableOutlined },
     ],
     [    // 基础信息维护
+        { key: MENU_KEY.ProductProperty, label: 'product-property', icon: AppstoreOutlined },
         { key: MENU_KEY.ProductInfo, label: 'product-info', icon: ProductOutlined },
         { key: MENU_KEY.WarehouseInfo, label: 'warehouse-info', icon: ShopOutlined },
         { key: MENU_KEY.LocationInfo, label: 'location-info', icon: EnvironmentOutlined },
