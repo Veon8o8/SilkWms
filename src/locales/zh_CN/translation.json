@@ -37,5 +37,39 @@
     "outbound-order": "出库单",
     "product-in-out-management": "产品出入库管理",
     "inventory-allocation": "库存调拨管理",
-    "inventory-counting": "库存盘点管理"
+    "inventory-counting": "库存盘点管理",
+    "common": {
+        "confirm": "确定",
+        "cancel": "取消"
+    },
+    "productProperty": {
+        "form": {
+            "name": "属性名称",
+            "icon": "图标",
+            "color": "主题色",
+            "sortOrder": "排序序号"
+        },
+        "placeholder": {
+            "name": "请输入属性名称，如：成品（生产）",
+            "icon": "请选择图标",
+            "color": "请选择主题色",
+            "sortOrder": "数字越小越靠前"
+        },
+        "icon": {
+            "finished": "成品图标",
+            "raw": "原料图标",
+            "spare": "备件图标",
+            "waste": "废料图标",
+            "plan": "计划图标"
+        },
+        "color": {
+            "blue": "蓝色",
+            "orange": "橙色",
+            "purple": "紫色",
+            "red": "红色",
+            "cyan": "青色",
+            "green": "绿色",
+            "pink": "粉色"
+        }
+    }
 }

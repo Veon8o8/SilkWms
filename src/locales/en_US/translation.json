@@ -14,7 +14,6 @@
     "no-data": "There's no data!",
     "more": "More",
     "date": "Date",
-
     "login": "Login",
     "username": "Username",
     "account": "Account",
@@ -22,9 +21,7 @@
     "hint-account": "Please input your account!",
     "hint-password": "Please input your password!",
     "remember-account": "Remember me",
-
     "front-page": "首页",
-    
     "user": {
         "avatar": "Avatar"
     },
@@ -41,12 +38,10 @@
     "action": "Action",
     "freeze": "Freeze",
     "block": "Block",
-    
     "user-detail": "User Detail",
     "user-info": "User Info",
     "publish-task": "Publish Task",
     "claim-task": "Claim Task",
-
     "task-mgmt": "Task Mgmt",
     "task-list": "Task List",
     "task-detail": "Task Detail",
@@ -67,10 +62,8 @@
     "item-type": "Item Type",
     "on-shelf": "Recover",
     "off-shelf": "Cancel",
-
     "turnover-mgmt": "Turnover Mgmt",
     "turnover-list": "Turnover List",
-
     "auth-mgmt": "Auth Mgmt",
     "admin-list": "Admin List",
     "admin-name": "Admin Account",
@@ -82,11 +75,10 @@
     "hint-add-admin-nickname": "Please input admin nickname!",
     "hint-add-admin-password": "Please input admin password!",
     "hint-add-admin-role": "Please select admin role!",
-    "admin-role-normal":"Normal",
-    "admin-role-area":"Area",
+    "admin-role-normal": "Normal",
+    "admin-role-area": "Area",
     "admin-create-time": "Create Time",
     "edit": "Edit",
-
     "dynamic-mgmt": "Dynamic Mgmt",
     "admin-dynamic": "Admin Dynamic",
     "user-dynamic": "User Dynamic",
@@ -102,5 +94,39 @@
     "admin-area": "Area Admin",
     "title-add-date": "Add Date",
     "hint-add-date": "Please input or select date!",
-    "add-date-tab": "Add Date Tab"
+    "add-date-tab": "Add Date Tab",
+    "common": {
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+    },
+    "productProperty": {
+        "form": {
+            "name": "Property Name",
+            "icon": "Icon",
+            "color": "Theme Color",
+            "sortOrder": "Sort Order"
+        },
+        "placeholder": {
+            "name": "Enter property name, e.g.: Finished Product",
+            "icon": "Select icon",
+            "color": "Select theme color",
+            "sortOrder": "Smaller number appears first"
+        },
+        "icon": {
+            "finished": "Finished Product Icon",
+            "raw": "Raw Material Icon",
+            "spare": "Spare Part Icon",
+            "waste": "Waste Icon",
+            "plan": "Plan Icon"
+        },
+        "color": {
+            "blue": "Blue",
+            "orange": "Orange",
+            "purple": "Purple",
+            "red": "Red",
+            "cyan": "Cyan",
+            "green": "Green",
+            "pink": "Pink"
+        }
+    }
 }
