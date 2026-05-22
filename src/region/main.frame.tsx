@@ -12,7 +12,7 @@ import { MENU_KEY } from '../config/sider';
 import { strUtil } from '../utils/StrUtil';
 import { FrameHome } from '../page/home/frame';
 import { httpUtil } from '../utils/HttpUtil';
-import { DepartmentApi, PositionApi } from '../config/api';
+import { DepartmentApi, PositionApi, ProductPropertyApi } from '../config/api';
 import { LOCAL_STORAGE } from '../config/keys';
 import { DepartmentType, ErrResponse, PositionType, SucResponse } from '../config/type';
 import { timeUtil } from '../utils/TimeUtil';
@@ -79,6 +79,7 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
         // 请求服务器，获取部门和岗位数据，供员工档案页面使用
         this.fetchDepartment();
         this.fetchPosition();
+        this.getProductPropertyList();
     }
 
     private async fetchDepartment() {
@@ -139,6 +140,30 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
             const r = response as ErrResponse
             console.error(`获取岗位列表失败: [${r.errCode}] ${r.errMsg}`);
             httpUtil.tryGotoLogin(r);
+        }
+    }
+
+    private async getProductPropertyList() {
+        const TAG = `getProductPropertyList() - `
+        try {
+            // 构建请求参数
+            const params = {
+                token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+            }
+
+            // 发送请求
+            const response = await httpUtil.post(ProductPropertyApi.LIST, params);
+
+            console.log(TAG, `response:\n`, response)
+
+            if (response?.code === 0) {
+                // return response.data;
+            } else {
+                // throw new Error(response.message || '获取产品属性列表失败');
+            }
+        } catch (error) {
+            console.error('获取产品属性列表失败:', error);
+            throw error;
         }
     }
 

@@ -88,3 +88,25 @@ export const EmployeeApi = {
     DEL: `${URL}/coms/employee/del`,
     DETAIL: `${URL}/coms/employee/detail`,
 }
+
+/** 产品属性接口 (product-property). */
+export const ProductPropertyApi = {
+    /** 添加产品属性: /wms/product-property/add */
+    ADD: `${URL}/wms/product-property/add`,
+    /** 删除产品属性: /wms/product-property/del */
+    DEL: `${URL}/wms/product-property/del`,
+    /** 批量删除产品属性: /wms/product-property/batch-del */
+    BATCH_DEL: `${URL}/wms/product-property/batch-del`,
+    /** 编辑产品属性: /wms/product-property/edit */
+    EDIT: `${URL}/wms/product-property/edit`,
+    /** 获取产品属性列表: /wms/product-property/list */
+    LIST: `${URL}/wms/product-property/list`,
+    /** 获取产品属性详情: /wms/product-property/detail */
+    DETAIL: `${URL}/wms/product-property/detail`,
+    /** 更新产品属性状态: /wms/product-property/update-status */
+    UPDATE_STATUS: `${URL}/wms/product-property/update-status`,
+    /** 更新产品属性排序: /wms/product-property/update-sort */
+    UPDATE_SORT: `${URL}/wms/product-property/update-sort`,
+    /** 获取启用的产品属性: /wms/product-property/active-list */
+    ACTIVE_LIST: `${URL}/wms/product-property/active-list`,
+}
