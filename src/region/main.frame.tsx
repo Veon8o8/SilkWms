@@ -143,7 +143,7 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
         }
     }
 
-    private async getProductPropertyList() {
+    private getProductPropertyList = async () => {
         const TAG = `getProductPropertyList() - `
         try {
             // 构建请求参数
@@ -156,7 +156,7 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
 
             console.log(TAG, `response:\n`, response)
 
-            if (response?.code === 0) {
+            if (response?.code === 200) {
                 let result = response as SucResponse
                 let list = result.data.list;
                 let ppList: ProductPropertyType[] = []
@@ -217,12 +217,14 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
                         <ProductProperty
                             headerHeight={headerHeight}
                             productPropertyList={this.state.productPropertyList}
+                            getProductPropertyList={this.getProductPropertyList}
                         />
                     )
                 case MENU_KEY.ProductInfo:
                     return (
                         <ProductInfo
                             headerHeight={headerHeight}
+                            productPropertyList={this.state.productPropertyList}
                         />
                     )
                 case MENU_KEY.StorageStats:

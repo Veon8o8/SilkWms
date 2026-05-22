@@ -34,11 +34,22 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import '../../../css/basic.info/product.info/frame.css';
+import { ProductPropertyType } from '../../../config/type';
 
 const { Search } = Input;
 
+// 图标映射
+const iconMap: Record<string, React.ReactNode> = {
+    'AppstoreOutlined': <AppstoreOutlined />,
+    'DatabaseOutlined': <DatabaseOutlined />,
+    'ToolOutlined': <ToolOutlined />,
+    'DeleteOutlined': <DeleteOutlined />,
+    'ScheduleOutlined': <ScheduleOutlined />,
+};
+
 interface ProductInfoProps {
     headerHeight: number;
+    productPropertyList: ProductPropertyType[]
 }
 
 interface ProductRecord {
@@ -55,7 +66,7 @@ interface CategoryStat {
     key: string;
     title: string;
     count: number | string;
-    icon: React.ReactNode;
+    icon: string;
     color: string;
     tabKey: string;
 }
@@ -152,11 +163,11 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
 
     // 分类统计数据
     categoryStats: CategoryStat[] = [
-        { key: 'finished', title: '成品（生产）', count: 17, icon: <AppstoreOutlined />, color: '#1890ff', tabKey: 'finished' },
-        { key: 'raw', title: '原料', count: 99, icon: <DatabaseOutlined />, color: '#fa8c16', tabKey: 'raw' },
-        { key: 'spare', title: '备件', count: 5, icon: <ToolOutlined />, color: '#722ed1', tabKey: 'spare' },
-        { key: 'waste', title: '废料', count: 3, icon: <WasteOutlined />, color: '#f5222d', tabKey: 'waste' },
-        { key: 'plan', title: '计划成品', count: 2, icon: <ScheduleOutlined />, color: '#13c2c2', tabKey: 'plan' },
+        { key: 'finished', title: '成品（生产）', count: 17, icon: 'AppstoreOutlined', color: '#1890ff', tabKey: 'finished' },
+        { key: 'raw', title: '原料', count: 99, icon: 'DatabaseOutlined', color: '#fa8c16', tabKey: 'raw' },
+        { key: 'spare', title: '备件', count: 5, icon: 'ToolOutlined', color: '#722ed1', tabKey: 'spare' },
+        { key: 'waste', title: '废料', count: 3, icon: 'WasteOutlined', color: '#f5222d', tabKey: 'waste' },
+        { key: 'plan', title: '计划成品', count: 2, icon: 'ScheduleOutlined', color: '#13c2c2', tabKey: 'plan' },
     ];
 
     componentDidMount() {
@@ -175,6 +186,11 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
         window.removeEventListener('resize', this.updateTableScrollY);
     }
 
+    // 获取图标组件
+    getIconComponent = (iconName: string) => {
+        return iconMap[iconName] || <AppstoreOutlined />;
+    };
+
     updateTableScrollY = () => {
         if (this.tableContainerRef.current) {
             // 获取表格容器的高度
@@ -191,11 +207,11 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
     getCurrentData = () => {
         const { activeTab } = this.state;
         switch (activeTab) {
-            case 'finished': return this.finishedProducts;
-            case 'raw': return this.rawProducts;
-            case 'spare': return this.spareProducts;
-            case 'waste': return this.wasteProducts;
-            case 'plan': return this.planProducts;
+            case '1': return this.finishedProducts;
+            case '2': return this.rawProducts;
+            case '3': return this.spareProducts;
+            case '4': return this.wasteProducts;
+            case '5': return this.planProducts;
             default: return this.finishedProducts;
         }
     };
@@ -304,7 +320,7 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
     };
 
     render() {
-        const { activeTab, searchText, loading, selectedRowKeys, currentPage, pageSize, tableScrollY } = this.state;
+        const { searchText, loading, selectedRowKeys, currentPage, pageSize, tableScrollY } = this.state;
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
@@ -387,25 +403,7 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
                 </div>
 
                 {/* 统计卡片 */}
-                <div className="product-info-stats">
-                    {this.categoryStats.map(stat => (
-                        <Card
-                            key={stat.key}
-                            className={`stat-card ${activeTab === stat.tabKey ? 'active' : ''}`}
-                            onClick={() => this.handleTabChange(stat.tabKey)}
-                            hoverable
-                            size="small"
-                        >
-                            <div className="stat-icon" style={{ color: stat.color }}>
-                                {stat.icon}
-                            </div>
-                            <div className="stat-content">
-                                <div className="stat-title">{stat.title}</div>
-                                <div className="stat-number">{stat.count}</div>
-                            </div>
-                        </Card>
-                    ))}
-                </div>
+                {this.renderProductInfoStats()}
 
                 {/* 表格区域 */}
                 <div className="product-info-table-container" ref={this.tableContainerRef}>
@@ -435,6 +433,44 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
                 </div>
             </div>
         );
+    }
+
+    renderProductInfoStats() {
+        const { activeTab } = this.state;
+        const { productPropertyList } = this.props;
+        this.categoryStats = [];
+        for (let i = 0; i < productPropertyList.length; i++) {
+            const e = productPropertyList[i];
+            this.categoryStats.push({
+                key: `${i + 1}`,
+                title: e.name,
+                count: 0,
+                icon: e.icon,
+                color: e.color,
+                tabKey: `${i + 1}`
+            })
+        }
+        return (
+            <div className="product-info-stats">
+                {this.categoryStats.map(stat => (
+                    <Card
+                        key={stat.key}
+                        className={`stat-card ${activeTab === stat.tabKey ? 'active' : ''}`}
+                        onClick={() => this.handleTabChange(stat.tabKey)}
+                        hoverable
+                        size="small"
+                    >
+                        <div className="stat-icon" style={{ color: stat.color }}>
+                            {this.getIconComponent(stat.icon)}
+                        </div>
+                        <div className="stat-content">
+                            <div className="stat-title">{stat.title}</div>
+                            <div className="stat-number">{stat.count}</div>
+                        </div>
+                    </Card>
+                ))}
+            </div>
+        )
     }
 }
 

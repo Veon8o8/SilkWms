@@ -7,6 +7,7 @@ export type ErrResponse = {
 export type SucResponse = {
     code: number;
     data: any;
+    message: string;
 }
 
 // 定义部门数据类型

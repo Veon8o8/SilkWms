@@ -25,10 +25,10 @@ class HttpUtil {
             DEBUG && console.log(TAG, `response.data:`, response.data)
 
             if (400 === response.data.code) {
-                return { code: 400, errMsg: response.data.message, errCode: response.data.errCode }
+                return { code: response.data.code, errMsg: response.data.message, errCode: response.data.errCode }
             }
             if (200 === response.data.code) {
-                return { code: 200, data: response.data.data }
+                return { code: response.data.code, data: response.data.data, message: response.data.message }
             }
         } catch (error) {
             return { code: 400, errMsg: `服务器找不到这个接口: ${api}`, errCode: 404 }

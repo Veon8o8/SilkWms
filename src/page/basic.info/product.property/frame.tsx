@@ -31,13 +31,19 @@ import PropertyFormModal, {
     FormData,
 } from './property.form.modal';
 import '../../../css/basic.info/product.property/frame.css';
-import { ProductPropertyType } from '../../../config/type';
+import { ErrResponse, ProductPropertyType, SucResponse } from '../../../config/type';
+import { LOCAL_STORAGE } from '../../../config/keys';
+import { httpUtil } from '../../../utils/HttpUtil';
+import { ProductPropertyApi } from '../../../config/api';
 
 const { Search } = Input;
 
+const CLS_NAME = `ProductProperty`;
+
 interface ProductPropertyProps {
     headerHeight: number;
-    productPropertyList: ProductPropertyType[]
+    productPropertyList: ProductPropertyType[];
+    getProductPropertyList: Function;
 }
 
 class _ProductProperty extends React.Component<
@@ -203,53 +209,171 @@ class _ProductProperty extends React.Component<
         }
 
         this.setState({ loading: true });
-        await new Promise(resolve => setTimeout(resolve, 500));
 
-        const now = new Date();
-        const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-
-        if (editingRecord) {
-            // 编辑：更新现有记录
-            const index = this.propertyData.findIndex(item => item.key === editingRecord.key);
-            if (index !== -1) {
-                this.propertyData[index] = {
-                    ...editingRecord,
+        try {
+            if (editingRecord) {
+                // 编辑：调用编辑接口
+                const response = await this.updateProductProperty({
+                    id: parseInt(editingRecord.key),
                     name: formData.name,
                     icon: formData.icon,
                     color: formData.color,
-                    sortOrder: formData.sortOrder,
+                    sortOrder: formData.sortOrder
+                });
+
+                if (response.success) {
+                    // 更新本地数据
+                    const index = this.propertyData.findIndex(item => item.key === editingRecord.key);
+                    if (index !== -1) {
+                        this.propertyData[index] = {
+                            ...editingRecord,
+                            name: formData.name,
+                            icon: formData.icon,
+                            color: formData.color,
+                            sortOrder: formData.sortOrder,
+                        };
+                    }
+                    message.success('编辑产品属性成功');
+                    // 重新获取列表
+                    await this.fetchProductPropertyList();
+                } else {
+                    message.error(response.message || '编辑失败');
+                    this.setState({ loading: false });
+                    return;
+                }
+            } else {
+                // 添加：调用添加接口
+                const response = await this.addProductProperty({
+                    name: formData.name,
+                    icon: formData.icon,
+                    color: formData.color,
+                    sortOrder: formData.sortOrder
+                });
+
+                if (response.success) {
+                    message.success('添加产品属性成功');
+                    // 重新获取列表
+                    await this.fetchProductPropertyList();
+                } else {
+                    message.error(response.message || '添加失败');
+                    this.setState({ loading: false });
+                    return;
+                }
+            }
+
+            // 关闭弹框并重置表单
+            this.setState({
+                loading: false,
+                modalVisible: false,
+                formData: {
+                    name: '',
+                    icon: 'AppstoreOutlined',
+                    color: '#1890ff',
+                    sortOrder: 1,
+                }
+            });
+        } catch (error) {
+            console.error('保存产品属性失败:', error);
+            message.error('网络错误，请稍后重试');
+            this.setState({ loading: false });
+        }
+    };
+
+    // 添加产品属性接口调用
+    addProductProperty = async (data: {
+        name: string;
+        icon: string;
+        color: string;
+        sortOrder: number;
+    }) => {
+        const DEBUG_ON = true
+        const TAG = `${CLS_NAME}.addProductProperty() - `
+        try {
+            // 构建请求参数
+            const params = {
+                token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+                name: data.name,
+                icon: data.icon,
+                color: data.color,
+                sort_order: data.sortOrder
+            }
+
+            // 发送请求
+            const response = await httpUtil.post(ProductPropertyApi.ADD, params);
+
+            DEBUG_ON && console.log(TAG, `response:\n`, response)
+
+            if (response?.code === 200) {
+                let result = response as SucResponse
+                return {
+                    success: true,
+                    data: result.data,
+                    message: result.message
+                };
+            } else {
+                // throw new Error(response.message || '获取产品属性列表失败');
+                let result = response as ErrResponse
+                return {
+                    success: false,
+                    data: null,
+                    message: result.errMsg
                 };
             }
-            message.success('编辑产品属性成功');
-        } else {
-            // 添加：新增记录
-            const newRecord: ProductPropertyRecord = {
-                key: String(Date.now()),
-                id: `prop_${Date.now()}`,
-                name: formData.name,
-                icon: formData.icon,
-                color: formData.color,
-                sortOrder: formData.sortOrder,
-                status: 'active',
-                createTime: timeStr,
+        } catch (error) {
+            console.error('添加产品属性API调用失败:', error);
+            return {
+                success: false,
+                message: '网络请求失败'
             };
-            this.propertyData.push(newRecord);
-            message.success('添加产品属性成功');
         }
+    };
 
-        // 按排序顺序重新排列
-        this.propertyData.sort((a, b) => a.sortOrder - b.sortOrder);
+    // 编辑产品属性接口调用
+    updateProductProperty = async (data: {
+        id: number;
+        name: string;
+        icon: string;
+        color: string;
+        sortOrder: number;
+    }) => {
+        try {
+            const response = await fetch('/api/wms/product-property/edit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    token: localStorage.getItem('token'),
+                    lang: localStorage.getItem('lang') || 'zh',
+                    id: data.id,
+                    name: data.name,
+                    icon: data.icon,
+                    color: data.color,
+                    sort_order: data.sortOrder
+                })
+            });
 
-        this.setState({
-            loading: false,
-            modalVisible: false,
-            formData: {
-                name: '',
-                icon: 'AppstoreOutlined',
-                color: '#1890ff',
-                sortOrder: 1,
-            }
-        });
+            const result = await response.json();
+            return {
+                success: result.code === 0,
+                data: result.data,
+                message: result.message
+            };
+        } catch (error) {
+            console.error('编辑产品属性API调用失败:', error);
+            return {
+                success: false,
+                message: '网络请求失败'
+            };
+        }
+    };
+
+    // 获取产品属性列表
+    fetchProductPropertyList = async () => {
+        // 通知框架刷新产品属性列表
+        const { getProductPropertyList } = this.props;
+        getProductPropertyList && getProductPropertyList();
     };
 
     // 取消模态框
