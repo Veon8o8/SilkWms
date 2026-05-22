@@ -14,7 +14,7 @@ import { FrameHome } from '../page/home/frame';
 import { httpUtil } from '../utils/HttpUtil';
 import { DepartmentApi, PositionApi, ProductPropertyApi } from '../config/api';
 import { LOCAL_STORAGE } from '../config/keys';
-import { DepartmentType, ErrResponse, PositionType, SucResponse } from '../config/type';
+import { DepartmentType, ErrResponse, PositionType, ProductPropertyType, SucResponse } from '../config/type';
 import { timeUtil } from '../utils/TimeUtil';
 import { ProductInfo } from '../page/basic.info/product.info/frame';
 import { ProductProperty } from '../page/basic.info/product.property/frame';
@@ -38,6 +38,7 @@ interface MainFrameState {
     accountId: number,
     departmentList: DepartmentType[],
     positionList: PositionType[],
+    productPropertyList: ProductPropertyType[],
 }
 
 class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainFrameState> {
@@ -70,10 +71,9 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
             accountId: 0,
             departmentList: [],
             positionList: [],
+            productPropertyList: [],
         };
     }
-
-
 
     componentDidMount() {
         // 请求服务器，获取部门和岗位数据，供员工档案页面使用
@@ -157,7 +157,23 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
             console.log(TAG, `response:\n`, response)
 
             if (response?.code === 0) {
-                // return response.data;
+                let result = response as SucResponse
+                let list = result.data.list;
+                let ppList: ProductPropertyType[] = []
+                for (let i = 0; i < list.length; i++) {
+                    const e = list[i];
+                    ppList.push({
+                        id: e.id,
+                        name: e.name,
+                        icon: e.icon,
+                        color: e.color,
+                        sortOrder: e.sortOrder,
+                        status: e.status,
+                        createTime: timeUtil.formatTimestamp(e.createTime),
+                        updateTime: timeUtil.formatTimestamp(e.updateTime),
+                    })
+                }
+                this.setState({ productPropertyList: ppList })
             } else {
                 // throw new Error(response.message || '获取产品属性列表失败');
             }
@@ -200,6 +216,7 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
                     return (
                         <ProductProperty
                             headerHeight={headerHeight}
+                            productPropertyList={this.state.productPropertyList}
                         />
                     )
                 case MENU_KEY.ProductInfo:

@@ -31,11 +31,13 @@ import PropertyFormModal, {
     FormData,
 } from './property.form.modal';
 import '../../../css/basic.info/product.property/frame.css';
+import { ProductPropertyType } from '../../../config/type';
 
 const { Search } = Input;
 
 interface ProductPropertyProps {
     headerHeight: number;
+    productPropertyList: ProductPropertyType[]
 }
 
 class _ProductProperty extends React.Component<
@@ -403,6 +405,22 @@ class _ProductProperty extends React.Component<
             selectedRowKeys,
             onChange: this.onSelectChange,
         };
+
+        const { productPropertyList } = this.props;
+        this.propertyData = []
+        for (let i = 0; i < productPropertyList.length; i++) {
+            const e = productPropertyList[i];
+            this.propertyData.push({
+                key: `${i + 1}`,
+                id: `${e.id}`,
+                name: e.name,
+                icon: e.icon,
+                color: e.color,
+                sortOrder: e.sortOrder,
+                status: e.status == 1 ? 'active' : 'inactive',
+                createTime: e.createTime,
+            })
+        }
 
         // 过滤数据 - 只根据名称搜索
         let filteredData = [...this.propertyData];

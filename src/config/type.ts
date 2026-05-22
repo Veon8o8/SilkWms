@@ -95,3 +95,30 @@ export interface EmployeeDetailType extends EmployeeType {
     submitter?: string;
     submitTime?: string;
 }
+
+/** 产品属性类型定义 */
+export interface ProductPropertyType {
+    /** 主键ID */
+    id: number;
+
+    /** 属性名称，如：成品（生产） */
+    name: string;
+
+    /** 图标名称，如：AppstoreOutlined */
+    icon: string;
+
+    /** 主题色，十六进制颜色值，如：#1890ff */
+    color: string;
+
+    /** 排序序号，数字越小越靠前 */
+    sortOrder: number;
+
+    /** 状态：0-禁用，1-启用 */
+    status: number;
+
+    /** 创建时间 */
+    createTime: string;
+
+    /** 更新时间 */
+    updateTime: string;
+}
