@@ -20,7 +20,7 @@ i18n
     .init({
         resources,
         lng: 'zh_CN', // 默认语言
-        keySeparator: false, // 默认为'.', 如果你的键中包含点，你可以指定一个不同的分隔符
+        keySeparator: '.', // 默认为'.', 如果你的键中包含点，你可以指定一个不同的分隔符
         interpolation: {
             escapeValue: false // 不要自动转义值
         }
