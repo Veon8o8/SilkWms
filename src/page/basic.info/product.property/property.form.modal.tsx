@@ -181,3 +181,6 @@ class _PropertyFormModal extends React.Component<WithTranslation & PropertyFormM
 
 const PropertyFormModal = withTranslation()(_PropertyFormModal);
 export default PropertyFormModal;
+export {
+    iconMap
+}

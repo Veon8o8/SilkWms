@@ -29,6 +29,7 @@ import {
 import PropertyFormModal, {
     ProductPropertyRecord,
     FormData,
+    iconMap,
 } from './property.form.modal';
 import '../../../css/basic.info/product.property/frame.css';
 import { ErrResponse, ProductPropertyType, SucResponse } from '../../../config/type';
@@ -120,18 +121,9 @@ class _ProductProperty extends React.Component<
         },
     ];
 
-    // 图标映射
-    iconMap: Record<string, React.ReactNode> = {
-        AppstoreOutlined: <AppstoreOutlined />,
-        DatabaseOutlined: <DatabaseOutlined />,
-        ToolOutlined: <ToolOutlined />,
-        DeleteOutlined: <WasteOutlined />,
-        ScheduleOutlined: <ScheduleOutlined />,
-    };
-
     // 获取图标组件
     getIconComponent = (iconName: string) => {
-        return this.iconMap[iconName] || <AppstoreOutlined />;
+        return iconMap[iconName] || <AppstoreOutlined />;
     };
 
     // 添加产品属性
@@ -311,7 +303,6 @@ class _ProductProperty extends React.Component<
                     message: result.message
                 };
             } else {
-                // throw new Error(response.message || '获取产品属性列表失败');
                 let result = response as ErrResponse
                 return {
                     success: false,
@@ -336,30 +327,39 @@ class _ProductProperty extends React.Component<
         color: string;
         sortOrder: number;
     }) => {
+        const DEBUG_ON = true
+        const TAG = `${CLS_NAME}.updateProductProperty() - `
         try {
-            const response = await fetch('/api/wms/product-property/edit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({
-                    token: localStorage.getItem('token'),
-                    lang: localStorage.getItem('lang') || 'zh',
-                    id: data.id,
-                    name: data.name,
-                    icon: data.icon,
-                    color: data.color,
-                    sort_order: data.sortOrder
-                })
-            });
+            // 构建请求参数
+            const params = {
+                token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+                id: data.id,
+                name: data.name,
+                icon: data.icon,
+                color: data.color,
+                sort_order: data.sortOrder
+            }
 
-            const result = await response.json();
-            return {
-                success: result.code === 0,
-                data: result.data,
-                message: result.message
-            };
+            // 发送请求
+            const response = await httpUtil.post(ProductPropertyApi.EDIT, params);
+
+            DEBUG_ON && console.log(TAG, `response:\n`, response)
+
+            if (response?.code === 200) {
+                let result = response as SucResponse
+                return {
+                    success: true,
+                    data: result.data,
+                    message: result.message
+                };
+            } else {
+                let result = response as ErrResponse
+                return {
+                    success: false,
+                    data: null,
+                    message: result.errMsg
+                };
+            }
         } catch (error) {
             console.error('编辑产品属性API调用失败:', error);
             return {

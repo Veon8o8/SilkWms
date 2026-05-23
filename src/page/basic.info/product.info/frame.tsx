@@ -29,23 +29,14 @@ import {
     AppstoreOutlined,
     DatabaseOutlined,
     ToolOutlined,
-    DeleteOutlined as WasteOutlined,
     ScheduleOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import '../../../css/basic.info/product.info/frame.css';
 import { ProductPropertyType } from '../../../config/type';
+import { iconMap } from '../product.property/property.form.modal';
 
 const { Search } = Input;
-
-// 图标映射
-const iconMap: Record<string, React.ReactNode> = {
-    'AppstoreOutlined': <AppstoreOutlined />,
-    'DatabaseOutlined': <DatabaseOutlined />,
-    'ToolOutlined': <ToolOutlined />,
-    'DeleteOutlined': <DeleteOutlined />,
-    'ScheduleOutlined': <ScheduleOutlined />,
-};
 
 interface ProductInfoProps {
     headerHeight: number;
