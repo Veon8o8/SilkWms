@@ -158,14 +158,32 @@ class _ProductProperty extends React.Component<
 
     // 删除产品属性
     handleDelete = async (record: ProductPropertyRecord) => {
+        const DEBUG_ON = true
+        const TAG = `${CLS_NAME}.handleDelete() - `
         this.setState({ loading: true });
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        try {
+            const params = {
+                token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+                id: record.id
+            }
 
-        const newData = this.propertyData.filter((item) => item.key !== record.key);
-        this.propertyData.length = 0;
-        this.propertyData.push(...newData);
+            // 发送请求
+            const response = await httpUtil.post(ProductPropertyApi.DEL, params);
 
-        message.success(`删除产品属性"${record.name}"成功`);
+            DEBUG_ON && console.log(TAG, `response:\n`, response)
+
+            if (response?.code === 200) {
+                await this.fetchProductPropertyList()
+                let result = response as SucResponse
+                console.log(TAG, result.message)
+            } else {
+                let result = response as ErrResponse
+                console.error('删除产品属性失败:', result.errMsg);
+            }
+        }
+        catch (error) {
+            console.error('删除产品属性API调用失败:', error);
+        }
         this.setState({ loading: false, selectedRowKeys: [] });
     };
 
