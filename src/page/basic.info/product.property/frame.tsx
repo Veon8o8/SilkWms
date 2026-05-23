@@ -516,14 +516,86 @@ class _ProductProperty extends React.Component<
 
     render() {
         const {
+            loading,
+            modalVisible,
+            modalTitle,
+            formData,
+        } = this.state;
+
+        return (
+            <div className="product-property-wrapper">
+                {this.renderTitle()}
+                {this.renderOpBar()}
+                {this.renderTable()}
+
+                {/* 使用抽取出的弹框组件 */}
+                <PropertyFormModal
+                    visible={modalVisible}
+                    title={modalTitle}
+                    formData={formData}
+                    loading={loading}
+                    onOk={this.handleSave}
+                    onCancel={this.handleCancel}
+                    onFormDataChange={this.handleFormDataChange}
+                />
+            </div>
+        );
+    }
+
+    /** 标题栏 */
+    renderTitle() {
+        return (
+            <div className="product-property-header">
+                <h2 className="product-property-title">产品属性列表</h2>
+                <div className="product-property-desc">
+                    管理产品信息页面的统计卡片数据源
+                </div>
+            </div>
+        )
+    }
+
+    /** 操作栏 */
+    renderOpBar() {
+        return (
+            <div className="product-property-actions">
+                <Space wrap size="middle">
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={this.handleAdd}
+                    >
+                        添加属性
+                    </Button>
+                    <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={this.handleBatchDelete}
+                    >
+                        批量删除
+                    </Button>
+                </Space>
+                <Space>
+                    <Search
+                        placeholder="搜索名称"
+                        allowClear
+                        onSearch={this.handleSearch}
+                        onChange={(e) => !e.target.value && this.handleSearch('')}
+                        style={{ width: 260 }}
+                        prefix={<SearchOutlined />}
+                    />
+                </Space>
+            </div>
+        )
+    }
+
+    /** 表格区域 */
+    renderTable() {
+        const {
             searchText,
             loading,
             selectedRowKeys,
             currentPage,
             pageSize,
-            modalVisible,
-            modalTitle,
-            formData,
         } = this.state;
         const rowSelection = {
             selectedRowKeys,
@@ -554,7 +626,6 @@ class _ProductProperty extends React.Component<
                     item.name.toLowerCase().includes(searchText.toLowerCase())
             );
         }
-
         // 分页数据
         const start = (currentPage - 1) * pageSize;
         const end = start + pageSize;
@@ -582,84 +653,31 @@ class _ProductProperty extends React.Component<
                 });
             },
         };
-
         return (
-            <div className="product-property-wrapper">
-                {/* 标题栏 */}
-                <div className="product-property-header">
-                    <h2 className="product-property-title">产品属性列表</h2>
-                    <div className="product-property-desc">
-                        管理产品信息页面的统计卡片数据源
-                    </div>
-                </div>
-
-                {/* 操作栏 */}
-                <div className="product-property-actions">
-                    <Space wrap size="middle">
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            onClick={this.handleAdd}
-                        >
-                            添加属性
-                        </Button>
-                        <Button
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={this.handleBatchDelete}
-                        >
-                            批量删除
-                        </Button>
-                    </Space>
-                    <Space>
-                        <Search
-                            placeholder="搜索名称"
-                            allowClear
-                            onSearch={this.handleSearch}
-                            onChange={(e) => !e.target.value && this.handleSearch('')}
-                            style={{ width: 260 }}
-                            prefix={<SearchOutlined />}
-                        />
-                    </Space>
-                </div>
-
-                {/* 表格区域 */}
-                <div className="product-property-table-container">
-                    <ConfigProvider
-                        theme={{
-                            components: {
-                                Table: {
-                                    headerBg: '#fafafa',
-                                },
+            <div className="product-property-table-container">
+                <ConfigProvider
+                    theme={{
+                        components: {
+                            Table: {
+                                headerBg: '#fafafa',
                             },
-                        }}
-                    >
-                        <Table
-                            rowSelection={rowSelection}
-                            columns={this.columns}
-                            dataSource={paginatedData}
-                            loading={loading}
-                            pagination={paginationConfig}
-                            scroll={{ x: 900 }}
-                            size="middle"
-                            bordered
-                            rowKey="key"
-                        />
-                    </ConfigProvider>
-                </div>
-
-                {/* 使用抽取出的弹框组件 */}
-                <PropertyFormModal
-                    visible={modalVisible}
-                    title={modalTitle}
-                    formData={formData}
-                    loading={loading}
-                    onOk={this.handleSave}
-                    onCancel={this.handleCancel}
-                    onFormDataChange={this.handleFormDataChange}
-                />
+                        },
+                    }}
+                >
+                    <Table
+                        rowSelection={rowSelection}
+                        columns={this.columns}
+                        dataSource={paginatedData}
+                        loading={loading}
+                        pagination={paginationConfig}
+                        scroll={{ x: 900 }}
+                        size="middle"
+                        bordered
+                        rowKey="key"
+                    />
+                </ConfigProvider>
             </div>
-        );
+        )
     }
 }
 
