@@ -32,7 +32,8 @@ export const MENU_KEY = {
     // 基础信息维护
     BaseInfo: "BaseInfo",
     // 基础信息维护 - 子菜单
-    ProductSpec: "ProductSpec",    // 规格型号
+    ProductSpec: "ProductSpec",         // 规格型号
+    ProductUnit: "ProductUnit",         // 产品单位
     ProductProperty: "ProductProperty", // 产品属性
     ProductInfo: "ProductInfo",         // 产品信息
     WarehouseInfo: "WarehouseInfo",     // 仓库信息
@@ -70,6 +71,7 @@ export const SUBMENU = [
     ],
     [    // 基础信息维护
         { key: MENU_KEY.ProductSpec, label: 'specification-model', icon: AppstoreOutlined },
+        { key: MENU_KEY.ProductUnit, label: 'product-unit', icon: AppstoreOutlined },
         { key: MENU_KEY.ProductProperty, label: 'product-property', icon: AppstoreOutlined },
         { key: MENU_KEY.ProductInfo, label: 'product-info', icon: ProductOutlined },
         { key: MENU_KEY.WarehouseInfo, label: 'warehouse-info', icon: ShopOutlined },

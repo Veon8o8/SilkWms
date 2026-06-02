@@ -144,3 +144,24 @@ export interface ProductSpecType {
     /** 更新时间 */
     updateTime: string;
 }
+
+// 产品单位类型
+export interface ProductUnitType {
+    /** 单位ID */
+    id: number;
+
+    /** 单位名称，例如：千克、个、包 */
+    name: string;
+
+    /** 排序序号，数值越小越靠前 */
+    sortOrder: number;
+
+    /** 状态：1-启用，0-禁用 */
+    status: number;
+
+    /** 创建时间，格式：YYYY-MM-DD HH:mm:ss */
+    createTime: string;
+
+    /** 更新时间，格式：YYYY-MM-DD HH:mm:ss */
+    updateTime: string;
+}

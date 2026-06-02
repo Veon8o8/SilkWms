@@ -12,13 +12,14 @@ import { MENU_KEY } from '../config/sider';
 import { strUtil } from '../utils/StrUtil';
 import { FrameHome } from '../page/home/frame';
 import { httpUtil } from '../utils/HttpUtil';
-import { DepartmentApi, PositionApi, ProductPropertyApi, ProductSpecApi } from '../config/api';
+import { DepartmentApi, PositionApi, ProductPropertyApi, ProductSpecApi, ProductUnitApi } from '../config/api';
 import { LOCAL_STORAGE } from '../config/keys';
-import { DepartmentType, ErrResponse, PositionType, ProductPropertyType, ProductSpecType, SucResponse } from '../config/type';
+import { DepartmentType, ErrResponse, PositionType, ProductPropertyType, ProductSpecType, ProductUnitType, SucResponse } from '../config/type';
 import { timeUtil } from '../utils/TimeUtil';
 import { ProductInfo } from '../page/basic.info/product.info/frame';
 import { ProductProperty } from '../page/basic.info/product.property/frame';
 import { ProductSpec } from '../page/basic.info/product.spec/frame';
+import { ProductUnit } from '../page/basic.info/product.unit/frame';
 const { Content } = Layout;
 
 type MenuMode = 'vertical' | 'inline';
@@ -40,6 +41,7 @@ interface MainFrameState {
     departmentList: DepartmentType[],
     positionList: PositionType[],
     productSpecList: ProductSpecType[],
+    productUnitList: ProductUnitType[],
     productPropertyList: ProductPropertyType[],
 }
 
@@ -74,6 +76,7 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
             departmentList: [],
             positionList: [],
             productSpecList: [],
+            productUnitList: [],
             productPropertyList: [],
         };
     }
@@ -184,6 +187,44 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
         }
     }
 
+    private getProductUnitList = async () => {
+        const TAG = `getProductUnitList() - `
+        try {
+            // 构建请求参数
+            const params = {
+                token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+            }
+
+            // 发送请求
+            const response = await httpUtil.post(ProductUnitApi.LIST, params);
+
+            console.log(TAG, `response:\n`, response)
+
+            if (response?.code === 200) {
+                let result = response as SucResponse
+                let list = result.data.list;
+                let psList: ProductUnitType[] = []
+                for (let i = 0; i < list.length; i++) {
+                    const e = list[i];
+                    psList.push({
+                        id: e.id,
+                        name: e.name,
+                        sortOrder: e.sortOrder,
+                        status: e.status,
+                        createTime: timeUtil.formatTimestamp(e.createTime),
+                        updateTime: timeUtil.formatTimestamp(e.updateTime),
+                    })
+                }
+                this.setState({ productUnitList: psList })
+            } else {
+                // throw new Error(response.message || '获取产品属性列表失败');
+            }
+        } catch (error) {
+            console.error('获取产品规单位列表失败:', error);
+            throw error;
+        }
+    }
+
     private getProductPropertyList = async () => {
         const TAG = `getProductPropertyList() - `
         try {
@@ -259,6 +300,14 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
                             headerHeight={headerHeight}
                             productPropertyList={this.state.productSpecList}
                             getProductSpecList={this.getProductSpecList}
+                        />
+                    )
+                case MENU_KEY.ProductUnit:
+                    return (
+                        <ProductUnit
+                            headerHeight={headerHeight}
+                            productUnitList={this.state.productUnitList}
+                            getProductUnitList={this.getProductUnitList}
                         />
                     )
                 case MENU_KEY.ProductProperty:

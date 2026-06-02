@@ -1,5 +1,5 @@
-// src/page/basic.info/product.spec/frame.tsx
-// 规格型号框架
+// src/page/basic.info/product.unit/frame.tsx
+// 产品单位框架
 
 import React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
@@ -21,28 +21,28 @@ import {
     DeleteOutlined,
     SearchOutlined,
 } from '@ant-design/icons';
-import PropertyFormModal, {
-    ProductSpecRecord,
+import ProductUnitModal, {
+    ProductUnitRecord,
     FormData,
-} from './spec.form.modal';
-import '../../../css/basic.info/product.spec/frame.css';
-import { ErrResponse, ProductSpecType, SucResponse } from '../../../config/type';
+} from './unit.form.modal';
+import '../../../css/basic.info/product.unit/frame.css';
+import { ErrResponse, ProductUnitType, SucResponse } from '../../../config/type';
 import { LOCAL_STORAGE } from '../../../config/keys';
 import { httpUtil } from '../../../utils/HttpUtil';
-import { ProductSpecApi } from '../../../config/api';
+import { ProductUnitApi } from '../../../config/api';
 
 const { Search } = Input;
 
-const CLS_NAME = `ProductSpec`;
+const CLS_NAME = `ProductUnit`;
 
-interface ProductSpecProps {
+interface ProductUnitProps {
     headerHeight: number;
-    productPropertyList: ProductSpecType[];
-    getProductSpecList: Function;
+    productUnitList: ProductUnitType[];
+    getProductUnitList: Function;
 }
 
-class _ProductSpec extends React.Component<
-    WithTranslation & ProductSpecProps
+class _ProductUnit extends React.Component<
+    WithTranslation & ProductUnitProps
 > {
     state = {
         searchText: '',
@@ -51,64 +51,60 @@ class _ProductSpec extends React.Component<
         currentPage: 1,
         pageSize: 10,
         modalVisible: false,
-        modalTitle: '添加产品规格',
-        editingRecord: null as ProductSpecRecord | null,
+        modalTitle: '添加产品单位',
+        editingRecord: null as ProductUnitRecord | null,
         formData: {
             name: '',
-            icon: '',
-            color: '',
             sortOrder: 1,
         },
     };
 
-    // 产品规格数据 - 这是统计卡片的数据来源
-    specData: ProductSpecRecord[] = [
+    // 产品单位数据 - 这是统计卡片的数据来源
+    unitData: ProductUnitRecord[] = [
         {
             key: '1',
-            id: 'spec_001',
-            name: '筒（C类）1000g',
+            id: 'unit_001',
+            name: '千克',
             sortOrder: 1,
             status: 'active',
             createTime: '2024-01-15 10:30:00',
         },
         {
             key: '2',
-            id: 'spec_002',
-            name: '绞（一等）1.27m/200g',
+            id: 'unit_002',
+            name: '个',
             sortOrder: 2,
             status: 'active',
             createTime: '2024-01-15 10:30:00',
         },
         {
             key: '3',
-            id: 'spec_003',
-            name: '绞（二等）1.27m/200g',
+            id: 'unit_003',
+            name: '包',
             sortOrder: 3,
             status: 'active',
             createTime: '2024-01-15 10:30:00',
         }
     ];
 
-    // 添加产品规格
+    // 添加产品单位
     handleAdd = () => {
         this.setState({
             modalVisible: true,
-            modalTitle: '添加产品规格',
+            modalTitle: '添加产品单位',
             editingRecord: null,
             formData: {
                 name: '',
-                icon: 'AppstoreOutlined',
-                color: '#1890ff',
-                sortOrder: this.specData.length + 1,
+                sortOrder: this.unitData.length + 1,
             },
         });
     };
 
-    // 编辑产品规格
-    handleEdit = (record: ProductSpecRecord) => {
+    // 编辑产品单位
+    handleEdit = (record: ProductUnitRecord) => {
         this.setState({
             modalVisible: true,
-            modalTitle: '编辑产品规格',
+            modalTitle: '编辑产品单位',
             editingRecord: record,
             formData: {
                 name: record.name,
@@ -117,8 +113,8 @@ class _ProductSpec extends React.Component<
         });
     };
 
-    // 删除产品规格
-    handleDelete = async (record: ProductSpecRecord) => {
+    // 删除产品单位
+    handleDelete = async (record: ProductUnitRecord) => {
         const DEBUG_ON = true
         const TAG = `${CLS_NAME}.handleDelete() - `
         this.setState({ loading: true });
@@ -128,22 +124,21 @@ class _ProductSpec extends React.Component<
                 id: record.id
             }
 
-            // 发送请求
-            const response = await httpUtil.post(ProductSpecApi.DEL, params);
+            const response = await httpUtil.post(ProductUnitApi.DEL, params);
 
             DEBUG_ON && console.log(TAG, `response:\n`, response)
 
             if (response?.code === 200) {
-                await this.fetchProductSpecList()
+                await this.fetchProductUnitList()
                 let result = response as SucResponse
                 console.log(TAG, result.message)
             } else {
                 let result = response as ErrResponse
-                console.error('删除产品规格失败:', result.errMsg);
+                console.error('删除产品单位失败:', result.errMsg);
             }
         }
         catch (error) {
-            console.error('删除产品规格API调用失败:', error);
+            console.error('删除产品单位API调用失败:', error);
         }
         this.setState({ loading: false, selectedRowKeys: [] });
     };
@@ -152,30 +147,29 @@ class _ProductSpec extends React.Component<
     handleBatchDelete = async () => {
         const { selectedRowKeys } = this.state;
         if (selectedRowKeys.length === 0) {
-            message.warning('请选择要删除的产品规格');
+            message.warning('请选择要删除的产品单位');
             return;
         }
 
         this.setState({ loading: true });
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        const newData = this.specData.filter(
+        const newData = this.unitData.filter(
             (item) => !selectedRowKeys.includes(item.key)
         );
-        this.specData.length = 0;
-        this.specData.push(...newData);
+        this.unitData.length = 0;
+        this.unitData.push(...newData);
 
-        message.success(`成功删除 ${selectedRowKeys.length} 个产品规格`);
+        message.success(`成功删除 ${selectedRowKeys.length} 个产品单位`);
         this.setState({ loading: false, selectedRowKeys: [] });
     };
 
-    // 保存产品规格（添加/编辑）
+    // 保存产品单位（添加/编辑）
     handleSave = async () => {
         const { formData, editingRecord } = this.state;
 
-        // 表单验证 - 只验证名称
         if (!formData.name.trim()) {
-            message.warning('请输入产品规格名称');
+            message.warning('请输入产品单位名称');
             return;
         }
 
@@ -183,46 +177,37 @@ class _ProductSpec extends React.Component<
 
         try {
             if (editingRecord) {
-                // 编辑：调用编辑接口
-                const response = await this.updateProductSpec({
+                const response = await this.updateProductUnit({
                     id: parseInt(editingRecord.key),
                     name: formData.name,
-                    icon: formData.icon,
-                    color: formData.color,
                     sortOrder: formData.sortOrder
                 });
 
                 if (response.success) {
-                    // 更新本地数据
-                    const index = this.specData.findIndex(item => item.key === editingRecord.key);
+                    const index = this.unitData.findIndex(item => item.key === editingRecord.key);
                     if (index !== -1) {
-                        this.specData[index] = {
+                        this.unitData[index] = {
                             ...editingRecord,
                             name: formData.name,
                             sortOrder: formData.sortOrder,
                         };
                     }
-                    message.success('编辑产品规格成功');
-                    // 重新获取列表
-                    await this.fetchProductSpecList();
+                    message.success('编辑产品单位成功');
+                    await this.fetchProductUnitList();
                 } else {
                     message.error(response.message || '编辑失败');
                     this.setState({ loading: false });
                     return;
                 }
             } else {
-                // 添加：调用添加接口
-                const response = await this.addProductSpec({
+                const response = await this.addProductUnit({
                     name: formData.name,
-                    icon: formData.icon,
-                    color: formData.color,
                     sortOrder: formData.sortOrder
                 });
 
                 if (response.success) {
-                    message.success('添加产品规格成功');
-                    // 重新获取列表
-                    await this.fetchProductSpecList();
+                    message.success('添加产品单位成功');
+                    await this.fetchProductUnitList();
                 } else {
                     message.error(response.message || '添加失败');
                     this.setState({ loading: false });
@@ -230,45 +215,36 @@ class _ProductSpec extends React.Component<
                 }
             }
 
-            // 关闭弹框并重置表单
             this.setState({
                 loading: false,
                 modalVisible: false,
                 formData: {
                     name: '',
-                    icon: 'AppstoreOutlined',
-                    color: '#1890ff',
                     sortOrder: 1,
                 }
             });
         } catch (error) {
-            console.error('保存产品规格失败:', error);
+            console.error('保存产品单位失败:', error);
             message.error('网络错误，请稍后重试');
             this.setState({ loading: false });
         }
     };
 
-    // 添加产品规格接口调用
-    addProductSpec = async (data: {
+    // 添加产品单位接口调用
+    addProductUnit = async (data: {
         name: string;
-        icon: string;
-        color: string;
         sortOrder: number;
     }) => {
         const DEBUG_ON = true
-        const TAG = `${CLS_NAME}.addProductSpec() - `
+        const TAG = `${CLS_NAME}.addProductUnit() - `
         try {
-            // 构建请求参数
             const params = {
                 token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
                 name: data.name,
-                icon: data.icon,
-                color: data.color,
                 sort_order: data.sortOrder
             }
 
-            // 发送请求
-            const response = await httpUtil.post(ProductSpecApi.ADD, params);
+            const response = await httpUtil.post(ProductUnitApi.ADD, params);
 
             DEBUG_ON && console.log(TAG, `response:\n`, response)
 
@@ -288,7 +264,7 @@ class _ProductSpec extends React.Component<
                 };
             }
         } catch (error) {
-            console.error('添加产品规格API调用失败:', error);
+            console.error('添加产品单位API调用失败:', error);
             return {
                 success: false,
                 message: '网络请求失败'
@@ -296,29 +272,23 @@ class _ProductSpec extends React.Component<
         }
     };
 
-    // 编辑产品规格接口调用
-    updateProductSpec = async (data: {
+    // 编辑产品单位接口调用
+    updateProductUnit = async (data: {
         id: number;
         name: string;
-        icon: string;
-        color: string;
         sortOrder: number;
     }) => {
         const DEBUG_ON = true
-        const TAG = `${CLS_NAME}.updateProductSpec() - `
+        const TAG = `${CLS_NAME}.updateProductUnit() - `
         try {
-            // 构建请求参数
             const params = {
                 token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
                 id: data.id,
                 name: data.name,
-                icon: data.icon,
-                color: data.color,
                 sort_order: data.sortOrder
             }
 
-            // 发送请求
-            const response = await httpUtil.post(ProductSpecApi.EDIT, params);
+            const response = await httpUtil.post(ProductUnitApi.EDIT, params);
 
             DEBUG_ON && console.log(TAG, `response:\n`, response)
 
@@ -338,7 +308,7 @@ class _ProductSpec extends React.Component<
                 };
             }
         } catch (error) {
-            console.error('编辑产品规格API调用失败:', error);
+            console.error('编辑产品单位API调用失败:', error);
             return {
                 success: false,
                 message: '网络请求失败'
@@ -346,11 +316,10 @@ class _ProductSpec extends React.Component<
         }
     };
 
-    // 获取产品规格列表
-    fetchProductSpecList = async () => {
-        // 通知框架刷新产品规格列表
-        const { getProductSpecList } = this.props;
-        getProductSpecList && getProductSpecList();
+    // 获取产品单位列表
+    fetchProductUnitList = async () => {
+        const { getProductUnitList } = this.props;
+        getProductUnitList && getProductUnitList();
     };
 
     // 取消模态框
@@ -360,8 +329,6 @@ class _ProductSpec extends React.Component<
             editingRecord: null,
             formData: {
                 name: '',
-                icon: 'AppstoreOutlined',
-                color: '#1890ff',
                 sortOrder: 1,
             },
         });
@@ -372,10 +339,10 @@ class _ProductSpec extends React.Component<
         this.setState({ formData: newFormData });
     };
 
-    // 表格列定义 - 移除了图标和主题色列，规格名称只显示字符串
-    columns: ColumnsType<ProductSpecRecord> = [
+    // 表格列定义
+    columns: ColumnsType<ProductUnitRecord> = [
         {
-            title: '规格名称',
+            title: '单位名称',
             dataIndex: 'name',
             key: 'name',
             width: 200,
@@ -422,7 +389,7 @@ class _ProductSpec extends React.Component<
                     </Tooltip>
                     <Popconfirm
                         title="确认删除"
-                        description={`确定要删除产品规格"${record.name}"吗？`}
+                        description={`确定要删除产品单位"${record.name}"吗？`}
                         onConfirm={() => this.handleDelete(record)}
                         okText="确定"
                         cancelText="取消"
@@ -461,13 +428,12 @@ class _ProductSpec extends React.Component<
         } = this.state;
 
         return (
-            <div className="product-spec-wrapper">
+            <div className="product-unit-wrapper">
                 {this.renderTitle()}
                 {this.renderOpBar()}
                 {this.renderTable()}
 
-                {/* 使用抽取出的弹框组件 */}
-                <PropertyFormModal
+                <ProductUnitModal
                     visible={modalVisible}
                     title={modalTitle}
                     formData={formData}
@@ -483,10 +449,10 @@ class _ProductSpec extends React.Component<
     /** 标题栏 */
     renderTitle() {
         return (
-            <div className="product-spec-header">
-                <h2 className="product-spec-title">规格型号列表</h2>
-                <div className="product-spec-desc">
-                    管理规格型号
+            <div className="product-unit-header">
+                <h2 className="product-unit-title">产品单位列表</h2>
+                <div className="product-unit-desc">
+                    管理产品单位
                 </div>
             </div>
         )
@@ -495,14 +461,14 @@ class _ProductSpec extends React.Component<
     /** 操作栏 */
     renderOpBar() {
         return (
-            <div className="product-spec-actions">
+            <div className="product-unit-actions">
                 <Space wrap size="middle">
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
                         onClick={this.handleAdd}
                     >
-                        添加规格
+                        添加单位
                     </Button>
                     <Button
                         danger
@@ -540,11 +506,11 @@ class _ProductSpec extends React.Component<
             onChange: this.onSelectChange,
         };
 
-        const { productPropertyList } = this.props;
-        this.specData = []
-        for (let i = 0; i < productPropertyList.length; i++) {
-            const e = productPropertyList[i];
-            this.specData.push({
+        const { productUnitList } = this.props;
+        this.unitData = []
+        for (let i = 0; i < productUnitList.length; i++) {
+            const e = productUnitList[i];
+            this.unitData.push({
                 key: `${i + 1}`,
                 id: `${e.id}`,
                 name: e.name,
@@ -554,20 +520,17 @@ class _ProductSpec extends React.Component<
             })
         }
 
-        // 过滤数据 - 只根据名称搜索
-        let filteredData = [...this.specData];
+        let filteredData = [...this.unitData];
         if (searchText) {
             filteredData = filteredData.filter(
                 (item) =>
                     item.name.toLowerCase().includes(searchText.toLowerCase())
             );
         }
-        // 分页数据
         const start = (currentPage - 1) * pageSize;
         const end = start + pageSize;
         const paginatedData = filteredData.slice(start, end);
 
-        // 分页配置
         const paginationConfig = {
             current: currentPage,
             pageSize: pageSize,
@@ -590,7 +553,7 @@ class _ProductSpec extends React.Component<
             },
         };
         return (
-            <div className="product-spec-table-container">
+            <div className="product-unit-table-container">
                 <ConfigProvider
                     theme={{
                         components: {
@@ -617,4 +580,4 @@ class _ProductSpec extends React.Component<
     }
 }
 
-export const ProductSpec = withTranslation()(_ProductSpec);
+export const ProductUnit = withTranslation()(_ProductUnit);

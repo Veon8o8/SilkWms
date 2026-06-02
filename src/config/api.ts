@@ -132,3 +132,16 @@ export const ProductSpecApi = {
     /** 获取启用的产品规格: /wms/product-spec/active-list */
     ACTIVE_LIST: `${URL}/wms/product-spec/active-list`,
 }
+
+// 产品单位API
+export const ProductUnitApi = {
+    ADD: `${URL}/wms/product-unit/add`,
+    DEL: `${URL}/wms/product-unit/del`,
+    BATCH_DEL: `${URL}/wms/product-unit/batch-del`,
+    EDIT: `${URL}/wms/product-unit/edit`,
+    LIST: `${URL}/wms/product-unit/list`,
+    DETAIL: `${URL}/wms/product-unit/detail`,
+    UPDATE_STATUS: `${URL}/wms/product-unit/update-status`,
+    UPDATE_SORT: `${URL}/wms/product-unit/update-sort`,
+    ACTIVE_LIST: `${URL}/wms/product-unit/active-list`,
+}

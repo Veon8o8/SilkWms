@@ -29,6 +29,7 @@
     "storage-stats": "仓储统计看板",
     "basic-info-maintenance": "基础信息维护",
     "specification-model": "规格型号",
+    "product-unit": "产品单位",
     "product-property": "产品属性",
     "product-info": "产品信息",
     "warehouse-info": "仓库信息",
@@ -80,6 +81,16 @@
         },
         "placeholder": {
             "name": "请输入规格名称，如：筒（C类）1000g",
+            "sortOrder": "数字越小越靠前"
+        }
+    },
+    "productUnit": {
+        "form": {
+            "name": "单位名称",
+            "sortOrder": "排序序号"
+        },
+        "placeholder": {
+            "name": "请输入单位名称，如：kg",
             "sortOrder": "数字越小越靠前"
         }
     }
