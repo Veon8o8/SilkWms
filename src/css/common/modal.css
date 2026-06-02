@@ -1,0 +1,16 @@
+.modal-icon {
+    font-size: 16px;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s;
+    padding-right: 26px;
+    border-radius: 4px;
+    position: relative;
+    /* 向上移动2px，如果不够可以改为 -3px 或 -4px */
+    top: -5px;
+}
+
+.modal-icon:hover {
+    color: #1890ff;
+    background-color: rgba(0, 0, 0, 0.04);
+}

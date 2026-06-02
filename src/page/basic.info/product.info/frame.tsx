@@ -35,6 +35,7 @@ import type { ColumnsType } from 'antd/es/table';
 import '../../../css/basic.info/product.info/frame.css';
 import { ProductPropertyType } from '../../../config/type';
 import { iconMap } from '../product.property/property.form.modal';
+import ProductInfoModal, { ProductInfoFormData } from './product.info.modal';
 
 const { Search } = Input;
 
@@ -73,6 +74,34 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
         currentPage: 1,
         pageSize: 10,
         tableScrollY: 400,
+        // 弹框相关状态
+        modalVisible: false,
+        modalTitle: '添加产品',
+        modalLoading: false,
+        modalFormData: {
+            productName: '',
+            specModel: '',
+            varietySpec: '',
+            productCategory: '',
+            productAttribute: '',
+            productIntro: '',
+            purchasePrice: undefined,
+            salePrice: undefined,
+            safetyStockLower: undefined,
+            safetyStockUpper: undefined,
+            processTemplateName: '',
+            productionSteps: [],
+            enterpriseId: '',
+            enterpriseName: '',
+            address: '',
+            enterpriseIntro: '',
+            qmTraceRecords: '',
+            qmInspectionRecords: '',
+            boundTraceCodeCount: undefined,
+            stockInspectionReport: '',
+            stockInspectionNo: '',
+            inspectionDate: '',
+        } as ProductInfoFormData,
     };
 
     // 成品数据
@@ -207,8 +236,66 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
         }
     };
 
+    // 打开添加产品弹框
     handleAddProduct = () => {
-        message.success(this.props.t('添加产品'));
+        // 重置表单数据
+        this.setState({
+            modalVisible: true,
+            modalTitle: '添加产品',
+            modalFormData: {
+                productName: '',
+                specModel: '',
+                varietySpec: '',
+                productCategory: '',
+                productAttribute: '',
+                productIntro: '',
+                purchasePrice: undefined,
+                salePrice: undefined,
+                safetyStockLower: undefined,
+                safetyStockUpper: undefined,
+                processTemplateName: '',
+                productionSteps: [],
+                enterpriseId: '',
+                enterpriseName: '',
+                address: '',
+                enterpriseIntro: '',
+                qmTraceRecords: '',
+                qmInspectionRecords: '',
+                boundTraceCodeCount: undefined,
+                stockInspectionReport: '',
+                stockInspectionNo: '',
+                inspectionDate: '',
+            }
+        });
+    };
+
+    // 关闭弹框
+    handleModalCancel = () => {
+        this.setState({ modalVisible: false });
+    };
+
+    // 弹框确认提交
+    handleModalOk = async () => {
+        const { modalFormData } = this.state;
+        this.setState({ modalLoading: true });
+
+        // 模拟提交数据到后端
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log('提交的产品数据:', modalFormData);
+            message.success(this.props.t('添加产品成功'));
+            this.setState({ modalVisible: false, modalLoading: false });
+            // 刷新表格数据等操作
+            // this.refreshTableData();
+        } catch (error) {
+            message.error(this.props.t('添加产品失败'));
+            this.setState({ modalLoading: false });
+        }
+    };
+
+    // 更新弹框表单数据
+    handleModalFormChange = (newFormData: ProductInfoFormData) => {
+        this.setState({ modalFormData: newFormData });
     };
 
     handleImport = () => {
@@ -311,7 +398,18 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
     };
 
     render() {
-        const { searchText, loading, selectedRowKeys, currentPage, pageSize, tableScrollY } = this.state;
+        const {
+            searchText,
+            loading,
+            selectedRowKeys,
+            currentPage,
+            pageSize,
+            tableScrollY,
+            modalVisible,
+            modalTitle,
+            modalLoading,
+            modalFormData
+        } = this.state;
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
@@ -414,7 +512,6 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
                             loading={loading}
                             pagination={paginationConfig}
                             scroll={{ x: 600, y: tableScrollY }}
-                            // scroll={{ x: 600 }}
                             size="middle"
                             bordered
                             rowKey="key"
@@ -422,6 +519,17 @@ class _ProductInfo extends React.Component<WithTranslation & ProductInfoProps> {
                         />
                     </ConfigProvider>
                 </div>
+
+                {/* 添加/编辑产品弹框 */}
+                <ProductInfoModal
+                    visible={modalVisible}
+                    title={modalTitle}
+                    formData={modalFormData}
+                    loading={modalLoading}
+                    onOk={this.handleModalOk}
+                    onCancel={this.handleModalCancel}
+                    onFormDataChange={this.handleModalFormChange}
+                />
             </div>
         );
     }
