@@ -32,10 +32,15 @@ export interface ProductInfoFormData {
     productCode?: string;          // 产品编码（自动生成）
     productName: string;           // 产品名称（批号）
     specModel: string;             // 规格型号（较长/简重）
+    unitWeight: number;            // 单重(kg)
     varietySpec: string;           // 品种规格
     productCategory: string;       // 产品类别
-    productImages?: string[];      // 产品图片
+    productClassification: string; // 产品归类
+    unit: string;                  // 单位
     productAttribute: string;      // 产品属性
+    productImages?: string[];      // 产品图片
+    defaultWarehouse: string;      // 默认仓库
+    supplier: string;              // 供应商
     productIntro?: string;         // 产品简介
 
     // 价格信息
@@ -108,7 +113,7 @@ const productCategoryOptions = [
 
 class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoModalProps> {
     state = {
-        isFullscreen: false,  // 添加全屏状态
+        isFullscreen: false,  // 全屏状态
     };
 
     // 切换全屏模式
@@ -197,32 +202,51 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
             t
         } = this.props;
 
+        // 从表单数据中解构所有字段
         const {
-            productCode,
-            productName,
-            specModel,
-            varietySpec,
-            productCategory,
-            productImages = [],
-            productAttribute,
-            productIntro,
-            purchasePrice,
-            salePrice,
-            safetyStockLower,
-            safetyStockUpper,
-            processTemplateName,
-            productionSteps = [],
-            enterpriseId,
-            enterpriseName,
-            address,
-            enterpriseIntro,
-            enterpriseImages = [],
-            qmTraceRecords,
-            qmInspectionRecords,
-            boundTraceCodeCount,
-            stockInspectionReport,
-            stockInspectionNo,
-            inspectionDate
+            // ----- 产品基础信息 -----
+            productCode,              // 产品编码（自动生成）
+            productName,              // 产品名称（批号）
+            specModel,                // 规格型号（较长/简重）
+            unitWeight,               // 单重(kg)
+            varietySpec,              // 品种规格
+            productCategory,          // 产品类别
+            productClassification,    // 产品归类
+            unit,                     // 单位
+            productAttribute,         // 产品属性（成品/原料/备件/废料/计划成品/其他）
+            productImages = [],       // 产品图片
+            defaultWarehouse,         // 默认仓库
+            supplier,                 // 供应商
+            productIntro,             // 产品简介
+
+            // ----- 价格信息 -----
+            purchasePrice,            // 采购单价（含税）
+            salePrice,                // 销售单价（含税）
+
+            // ----- 库存信息 -----
+            safetyStockLower,         // 安全库存下限
+            safetyStockUpper,         // 安全库存上限
+
+            // ----- 工序信息 -----
+            processTemplateName,      // 工序模板名称
+
+            // ----- 生产环节 -----
+            productionSteps = [],     // 生产环节步骤列表
+
+            // ----- 企业信息 -----
+            enterpriseId,             // 企业ID
+            enterpriseName,           // 企业名称
+            address,                  // 企业地址
+            enterpriseIntro,          // 企业简介
+            enterpriseImages = [],    // 企业环境图片
+
+            // ----- 质量管理 -----
+            qmTraceRecords,           // 溯源记录
+            qmInspectionRecords,      // 质检记录
+            boundTraceCodeCount,      // 绑定溯源码数量
+            stockInspectionReport,    // 库存质检报告
+            stockInspectionNo,        // 质检单编号
+            inspectionDate            // 报检日期
         } = formData;
 
         // 全屏时的样式
@@ -239,18 +263,30 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
             paddingBottom: 0,
         } : {};
 
+        // 全屏时 body 样式 - 移除高度限制，让内容自然滚动
         const fullscreenBodyStyle: React.CSSProperties = isFullscreen ? {
-            height: 'calc(100vh - 110px)',
-            maxHeight: 'calc(100vh - 110px)',
+            height: 'calc(100vh - 55px)',  // 减去标题栏高度
             overflowY: 'auto',
-        } : { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' };
+            padding: '24px',
+        } : { maxHeight: '70vh', overflowY: 'auto', padding: '24px' };
+
+        // 全屏时 Modal 的样式类名
+        const modalClassName = isFullscreen ? 'fullscreen-modal' : '';
 
         return (
             <Modal
                 title={
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', paddingRight: '32px' }}>
                         <span>{title}</span>
-                        <span className="modal-icon">
+                        <span
+                            className="modal-icon"
+                            style={{
+                                cursor: 'pointer',
+                                fontSize: '18px',
+                                display: 'inline-flex',
+                                alignItems: 'center'
+                            }}
+                        >
                             {
                                 isFullscreen ?
                                     <FullscreenExitOutlined onClick={this.toggleFullscreen} /> :
@@ -264,17 +300,19 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                 onCancel={onCancel}
                 okText={t('common.confirm')}
                 cancelText={t('common.cancel')}
-                width={isFullscreen ? '100vw' : 900}
+                width={isFullscreen ? '100vw' : 950}
                 confirmLoading={loading}
                 style={{ top: isFullscreen ? 0 : 20, ...fullscreenStyle }}
                 bodyStyle={fullscreenBodyStyle}
+                className={modalClassName}
+                destroyOnClose
             >
                 <Tabs defaultActiveKey="basic" type="card">
                     {/* 产品信息 Tab */}
                     <TabPane tab="产品信息" key="basic">
                         <Card title="产品信息" size="small" style={{ marginBottom: 16 }}>
-                            <div style={{ color: '#faad14', marginBottom: 16, fontSize: 12 }}>
-                                提示：如产品类型、型号等数据，在业务经营活动中增减变动较多；建议新建辅助表，作为下方“下拉框”字段的关联数据源，以便维护！
+                            <div style={{ color: '#7d5504', marginBottom: 16, fontSize: 12 }}>
+                                提示：如产品类型、型号等数据，在业务经营活动中增减变动较多；建议新建辅助表，作为下方"下拉框"字段的关联数据源，以便维护！
                             </div>
                             <Row gutter={16}>
                                 <Col span={8}>
@@ -303,6 +341,18 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                             </Row>
                             <Row gutter={16}>
                                 <Col span={8}>
+                                    <Form.Item label="单重(kg)" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
+                                        <InputNumber
+                                            value={unitWeight}
+                                            onChange={(value) => this.updateFormData('unitWeight', value)}
+                                            style={{ width: '100%' }}
+                                            min={0}
+                                            precision={3}
+                                            placeholder="请输入单重"
+                                        />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
                                     <Form.Item label="品种规格" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
                                         <Input
                                             value={varietySpec}
@@ -326,6 +376,26 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                                         </Select>
                                     </Form.Item>
                                 </Col>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col span={8}>
+                                    <Form.Item label="产品归类" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
+                                        <Input
+                                            value={productClassification}
+                                            onChange={(e) => this.updateFormData('productClassification', e.target.value)}
+                                            placeholder="请输入产品归类"
+                                        />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item label="单位" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
+                                        <Input
+                                            value={unit}
+                                            onChange={(e) => this.updateFormData('unit', e.target.value)}
+                                            placeholder="如：个、kg、米"
+                                        />
+                                    </Form.Item>
+                                </Col>
                                 <Col span={8}>
                                     <Form.Item label="产品属性" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
                                         <Select
@@ -340,14 +410,36 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                                     </Form.Item>
                                 </Col>
                             </Row>
-                            <Form.Item label="产品图片" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
-                                <Upload {...this.getUploadProps(
-                                    (urls) => this.updateFormData('productImages', urls),
-                                    productImages
-                                )}>
-                                    <Button icon={<UploadOutlined />}>选择 拖拽或单击后粘贴图片，单张20MB以内</Button>
-                                </Upload>
-                            </Form.Item>
+                            <Row gutter={16}>
+                                <Col span={8}>
+                                    <Form.Item label="默认仓库" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
+                                        <Input
+                                            value={defaultWarehouse}
+                                            onChange={(e) => this.updateFormData('defaultWarehouse', e.target.value)}
+                                            placeholder="请输入默认仓库"
+                                        />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item label="供应商" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
+                                        <Input
+                                            value={supplier}
+                                            onChange={(e) => this.updateFormData('supplier', e.target.value)}
+                                            placeholder="请输入供应商"
+                                        />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item label="产品图片" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
+                                        <Upload {...this.getUploadProps(
+                                            (urls) => this.updateFormData('productImages', urls),
+                                            productImages
+                                        )}>
+                                            <Button icon={<UploadOutlined />}>上传图片</Button>
+                                        </Upload>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
                             <Form.Item label="产品简介" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
                                 <TextArea
                                     value={productIntro}
