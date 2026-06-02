@@ -9,7 +9,11 @@ import {
     ShopOutlined,     // 仓库信息
     EnvironmentOutlined,   // 仓位信息
     InboxOutlined,         // 入库单
-    ExportOutlined,        // 出库单
+    ExportOutlined,
+    HomeOutlined,
+    FolderOutlined,
+    AuditOutlined,
+    ApartmentOutlined,        // 出库单
 } from '@ant-design/icons';
 
 // 配置: 侧边栏菜单项配置
@@ -28,6 +32,7 @@ export const MENU_KEY = {
     // 基础信息维护
     BaseInfo: "BaseInfo",
     // 基础信息维护 - 子菜单
+    ProductSpec: "ProductSpec",    // 规格型号
     ProductProperty: "ProductProperty", // 产品属性
     ProductInfo: "ProductInfo",         // 产品信息
     WarehouseInfo: "WarehouseInfo",     // 仓库信息
@@ -48,12 +53,12 @@ export const MENU_KEY = {
 
 /** 主菜单项 */
 export const MENU = [
-    { key: MENU_KEY.Home, label: 'front-page' },
-    { key: MENU_KEY.Dashboard, label: 'storage-stats-board' },
-    { key: MENU_KEY.BaseInfo, label: 'basic-info-maintenance' },
-    { key: MENU_KEY.ProductInOut, label: 'product-in-out-management' },
-    { key: MENU_KEY.StockTransfer, label: 'inventory-allocation' },
-    { key: MENU_KEY.StockCheck, label: 'inventory-counting' },
+    { key: MENU_KEY.Home, label: 'front-page', icon: HomeOutlined },
+    { key: MENU_KEY.Dashboard, label: 'storage-stats-board', icon: FolderOutlined },
+    { key: MENU_KEY.BaseInfo, label: 'basic-info-maintenance', icon: FolderOutlined },
+    { key: MENU_KEY.ProductInOut, label: 'product-in-out-management', icon: FolderOutlined },
+    { key: MENU_KEY.StockTransfer, label: 'inventory-allocation', icon: ApartmentOutlined },
+    { key: MENU_KEY.StockCheck, label: 'inventory-counting', icon: AuditOutlined },
 ];
 
 /** 子菜单项 */
@@ -64,6 +69,7 @@ export const SUBMENU = [
         { key: MENU_KEY.InOutDetails, label: 'in-out-details', icon: TableOutlined },
     ],
     [    // 基础信息维护
+        { key: MENU_KEY.ProductSpec, label: 'specification-model', icon: AppstoreOutlined },
         { key: MENU_KEY.ProductProperty, label: 'product-property', icon: AppstoreOutlined },
         { key: MENU_KEY.ProductInfo, label: 'product-info', icon: ProductOutlined },
         { key: MENU_KEY.WarehouseInfo, label: 'warehouse-info', icon: ShopOutlined },

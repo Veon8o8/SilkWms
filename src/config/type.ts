@@ -123,3 +123,24 @@ export interface ProductPropertyType {
     /** 更新时间 */
     updateTime: string;
 }
+
+/** 规格型号定义 */
+export interface ProductSpecType {
+    /** 主键ID */
+    id: number;
+
+    /** 属性名称，如：成品（生产） */
+    name: string;
+
+    /** 排序序号，数字越小越靠前 */
+    sortOrder: number;
+
+    /** 状态：0-禁用，1-启用 */
+    status: number;
+
+    /** 创建时间 */
+    createTime: string;
+
+    /** 更新时间 */
+    updateTime: string;
+}

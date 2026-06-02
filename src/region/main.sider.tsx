@@ -58,21 +58,12 @@ export class _MainSider extends React.Component<WithTranslation & MainSiderProps
             scrollbarGutter: 'stable',
         };
 
-        const menuIcons = [
-            HomeOutlined,           // 首页
-            FolderOutlined,         // 仓储统计看板
-            FolderOutlined,         // 基础信息维护
-            FolderOutlined,         // 产品出入库管理
-            ApartmentOutlined,      // 库存调拨管理
-            AuditOutlined,          // 库存盘点管理
-        ];
-
-        const menuItems: MenuProps['items'] = menuIcons.map(
+        const menuItems: MenuProps['items'] = MENU.map(
             (icon, index) => {
                 const menu = MENU[index]
                 let menuitem = {
                     key: menu.key,
-                    icon: React.createElement(icon),
+                    icon: React.createElement(menu.icon),
                     label: t(menu.label),
                 };
                 if (SUBMENU[index] && SUBMENU[index].length > 0) {

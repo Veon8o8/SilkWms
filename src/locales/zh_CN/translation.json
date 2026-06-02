@@ -28,6 +28,7 @@
     "storage-stats-board": "仓储统计看板",
     "storage-stats": "仓储统计看板",
     "basic-info-maintenance": "基础信息维护",
+    "specification-model": "规格型号",
     "product-property": "产品属性",
     "product-info": "产品信息",
     "warehouse-info": "仓库信息",
@@ -70,6 +71,16 @@
             "cyan": "青色",
             "green": "绿色",
             "pink": "粉色"
+        }
+    },
+    "productSpec": {
+        "form": {
+            "name": "规格名称",
+            "sortOrder": "排序序号"
+        },
+        "placeholder": {
+            "name": "请输入规格名称，如：筒（C类）1000g",
+            "sortOrder": "数字越小越靠前"
         }
     }
 }

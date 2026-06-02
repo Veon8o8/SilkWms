@@ -110,3 +110,25 @@ export const ProductPropertyApi = {
     /** 获取启用的产品属性: /wms/product-property/active-list */
     ACTIVE_LIST: `${URL}/wms/product-property/active-list`,
 }
+
+/** 产品规格接口 (product-spec). */
+export const ProductSpecApi = {
+    /** 添加产品规格: /wms/product-spec/add */
+    ADD: `${URL}/wms/product-spec/add`,
+    /** 删除产品规格: /wms/product-spec/del */
+    DEL: `${URL}/wms/product-spec/del`,
+    /** 批量删除产品规格: /wms/product-spec/batch-del */
+    BATCH_DEL: `${URL}/wms/product-spec/batch-del`,
+    /** 编辑产品规格: /wms/product-spec/edit */
+    EDIT: `${URL}/wms/product-spec/edit`,
+    /** 获取产品规格列表: /wms/product-spec/list */
+    LIST: `${URL}/wms/product-spec/list`,
+    /** 获取产品规格详情: /wms/product-spec/detail */
+    DETAIL: `${URL}/wms/product-spec/detail`,
+    /** 更新产品规格状态: /wms/product-spec/update-status */
+    UPDATE_STATUS: `${URL}/wms/product-spec/update-status`,
+    /** 更新产品规格排序: /wms/product-spec/update-sort */
+    UPDATE_SORT: `${URL}/wms/product-spec/update-sort`,
+    /** 获取启用的产品规格: /wms/product-spec/active-list */
+    ACTIVE_LIST: `${URL}/wms/product-spec/active-list`,
+}

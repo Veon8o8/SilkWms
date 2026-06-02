@@ -271,7 +271,7 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
         } : { maxHeight: '70vh', overflowY: 'auto', padding: '24px' };
 
         // 全屏时 Modal 的样式类名
-        const modalClassName = isFullscreen ? 'fullscreen-modal' : '';
+        const modalClassName = `product-info-modal ${isFullscreen ? 'fullscreen-modal' : ''}`;
 
         return (
             <Modal
@@ -309,8 +309,16 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
             >
                 <Tabs defaultActiveKey="basic" type="card">
                     {/* 产品信息 Tab */}
-                    <TabPane tab="产品信息" key="basic">
-                        <Card title="产品信息" size="small" style={{ marginBottom: 16 }}>
+                    <TabPane
+                        tab={<span style={{ fontSize: '18px', fontWeight: 'bold' }}>产品信息</span>}
+                        key="basic"
+                    >
+                        <Card
+                            title="产品信息"
+                            size="small"
+                            style={{ marginBottom: 16 }}
+                            headStyle={{ fontSize: '16px', color: '#003399', fontWeight: 600 }}
+                        >
                             <div style={{ color: '#7d5504', marginBottom: 16, fontSize: 12 }}>
                                 提示：如产品类型、型号等数据，在业务经营活动中增减变动较多；建议新建辅助表，作为下方"下拉框"字段的关联数据源，以便维护！
                             </div>
@@ -429,6 +437,18 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                                         />
                                     </Form.Item>
                                 </Col>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col span={8}>
+                                    <Form.Item label="产品简介" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
+                                        <TextArea
+                                            value={productIntro}
+                                            onChange={(e) => this.updateFormData('productIntro', e.target.value)}
+                                            rows={4}
+                                            placeholder="请输入产品简介"
+                                        />
+                                    </Form.Item>
+                                </Col>
                                 <Col span={8}>
                                     <Form.Item label="产品图片" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
                                         <Upload {...this.getUploadProps(
@@ -440,17 +460,14 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                                     </Form.Item>
                                 </Col>
                             </Row>
-                            <Form.Item label="产品简介" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
-                                <TextArea
-                                    value={productIntro}
-                                    onChange={(e) => this.updateFormData('productIntro', e.target.value)}
-                                    rows={4}
-                                    placeholder="请输入产品简介"
-                                />
-                            </Form.Item>
                         </Card>
 
-                        <Card title="产品价格信息" size="small" style={{ marginBottom: 16 }}>
+                        <Card
+                            title="产品价格信息"
+                            size="small"
+                            style={{ marginBottom: 16 }}
+                            headStyle={{ fontSize: '16px', color: '#003399', fontWeight: 600 }}
+                        >
                             <Row gutter={16}>
                                 <Col span={12}>
                                     <Form.Item label="参考采购单价(含税)/元" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
@@ -478,8 +495,12 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                                 </Col>
                             </Row>
                         </Card>
-
-                        <Card title="库存信息" size="small" style={{ marginBottom: 16 }}>
+                        <Card
+                            title="库存信息"
+                            size="small"
+                            style={{ marginBottom: 16 }}
+                            headStyle={{ fontSize: '16px', color: '#003399', fontWeight: 600 }}
+                        >
                             <Row gutter={16}>
                                 <Col span={12}>
                                     <Form.Item label="安全库存下限" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
@@ -506,7 +527,12 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                             </Row>
                         </Card>
 
-                        <Card title="工序信息" size="small" style={{ marginBottom: 16 }}>
+                        <Card
+                            title="工序信息"
+                            size="small"
+                            style={{ marginBottom: 16 }}
+                            headStyle={{ fontSize: '16px', color: '#003399', fontWeight: 600 }}
+                        >
                             <Form.Item label="工序模板名称" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
                                 <Select
                                     value={processTemplateName}
@@ -590,7 +616,10 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                     </TabPane>
 
                     {/* 企业信息 Tab */}
-                    <TabPane tab="企业信息" key="enterprise">
+                    <TabPane
+                        tab={<span style={{ fontSize: '18px', fontWeight: 'bold' }}>企业信息</span>}
+                        key="enterprise"
+                    >
                         <Card title="企业信息" size="small" style={{ marginBottom: 16 }}>
                             <Row gutter={16}>
                                 <Col span={12}>
@@ -648,7 +677,10 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                     </TabPane>
 
                     {/* 质量管理信息 Tab */}
-                    <TabPane tab="质量管理信息" key="quality">
+                    <TabPane
+                        tab={<span style={{ fontSize: '18px', fontWeight: 'bold' }}>质量管理信息</span>}
+                        key="quality"
+                    >
                         <Card title="质量管理信息" size="small" style={{ marginBottom: 16 }}>
                             <Form.Item label="溯源记录信息和质检记录信息" labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
                                 <TextArea
@@ -714,7 +746,7 @@ class _ProductInfoModal extends React.Component<WithTranslation & ProductInfoMod
                         </Card>
                     </TabPane>
                 </Tabs>
-            </Modal>
+            </Modal >
         );
     }
 }
