@@ -25,7 +25,7 @@ import {
     EyeOutlined,
 } from '@ant-design/icons';
 import '../../../css/basic.info/warehouse/frame.css';
-import { ErrResponse, WarehouseType } from '../../../config/type';
+import { ErrResponse, WarehouseType, SucResponse } from '../../../config/type';
 import { LOCAL_STORAGE } from '../../../config/keys';
 import { httpUtil } from '../../../utils/HttpUtil';
 import { WarehouseApi } from '../../../config/api';
@@ -60,7 +60,7 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
             warehouseName: '',
             warehouseCode: '',
             warehouseAddress: '',
-            warehouseStatus: 1,        // 1-启用，0-停用
+            warehouseStatus: 1,
             warehouseSupervisor: '',
             supervisorDepartment: '',
             contactPhone: '',
@@ -69,98 +69,7 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
     };
 
     // 仓库数据（静态数据，实际应从 props 或 API 获取）
-    warehouseData: WarehouseRecord[] = [
-        {
-            key: '1',
-            id: '1',
-            warehouseName: '包材仓库',
-            warehouseCode: 'CK10',
-            warehouseAddress: '四川省宜宾市长宁县生态园',
-            warehouseStatus: 1,
-            statusText: '启用',
-            subWarehouse: '关联子表',
-            warehouseSupervisor: '张三',
-            supervisorDepartment: '仓库部',
-            contactPhone: '13300000000',
-            submitter: '张三',
-            submitTime: '2026-01-08 14:32:25',
-        },
-        {
-            key: '2',
-            id: '2',
-            warehouseName: '废品仓库',
-            warehouseCode: 'CK09',
-            warehouseAddress: '四川省宜宾市长宁县生态园',
-            warehouseStatus: 1,
-            statusText: '启用',
-            subWarehouse: '关联子表',
-            warehouseSupervisor: '张三',
-            supervisorDepartment: '仓库部',
-            contactPhone: '13300000000',
-            submitter: '张三',
-            submitTime: '2026-01-05 13:15:55',
-        },
-        {
-            key: '3',
-            id: '3',
-            warehouseName: '临时仓',
-            warehouseCode: 'CK08',
-            warehouseAddress: '四川省宜宾市长宁县生态园附近',
-            warehouseStatus: 1,
-            statusText: '启用',
-            subWarehouse: '关联子表',
-            warehouseSupervisor: '张三',
-            supervisorDepartment: '仓库部',
-            contactPhone: '13300000000',
-            submitter: '张三',
-            submitTime: '2025-12-27 15:08:27',
-        },
-        {
-            key: '4',
-            id: '4',
-            warehouseName: '备件仓库',
-            warehouseCode: 'CK07',
-            warehouseAddress: '四川省宜宾市长宁县长宁县宋家坝工业园区',
-            warehouseStatus: 1,
-            statusText: '启用',
-            subWarehouse: '关联子表',
-            warehouseSupervisor: '长生线业',
-            supervisorDepartment: '仓库部',
-            contactPhone: '13300000001',
-            submitter: '长生线业',
-            submitTime: '2025-11-06 17:08:46',
-        },
-        {
-            key: '5',
-            id: '5',
-            warehouseName: '原料仓库',
-            warehouseCode: 'CK06',
-            warehouseAddress: '四川省宜宾市长宁县长宁县宋家坝工业园区',
-            warehouseStatus: 1,
-            statusText: '启用',
-            subWarehouse: '关联子表',
-            warehouseSupervisor: '李四',
-            supervisorDepartment: '仓库部',
-            contactPhone: '13300000001',
-            submitter: '长生线业',
-            submitTime: '2025-11-06 17:04:43',
-        },
-        {
-            key: '6',
-            id: '6',
-            warehouseName: '成品仓库',
-            warehouseCode: 'CK05',
-            warehouseAddress: '四川省宜宾市长宁县长宁县宋家坝工业园区',
-            warehouseStatus: 1,
-            statusText: '启用',
-            subWarehouse: '关联子表',
-            warehouseSupervisor: '李四',
-            supervisorDepartment: '仓库部',
-            contactPhone: '13300000001',
-            submitter: '长生线业',
-            submitTime: '2025-11-06 17:03:26',
-        },
-    ];
+    warehouseData: WarehouseRecord[] = [];
 
     componentDidMount() {
         this.updateTableScrollY();
@@ -234,15 +143,16 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
         try {
             const params = {
                 token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
-                id: record.id
+                id: parseInt(record.id, 10)
             };
             const response = await httpUtil.post(WarehouseApi.DEL, params);
             DEBUG_ON && console.log(TAG, `response:\n`, response);
             if (response?.code === 200) {
+                const sucResponse = response as SucResponse;
+                message.success(sucResponse.message || '删除成功');
                 await this.fetchWarehouseList();
-                message.success('删除成功');
             } else {
-                const errResponse = response as ErrResponse
+                const errResponse = response as ErrResponse;
                 message.error(errResponse?.errMsg || '删除失败');
             }
         } catch (error) {
@@ -252,33 +162,54 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
         this.setState({ loading: false, selectedRowKeys: [] });
     };
 
-    /** 批量删除 */
-    handleBatchDelete = async () => {
+    /** 批量删除 - 调用服务器接口 */
+    confirmBatchDelete = async () => {
         const { selectedRowKeys } = this.state;
-        if (selectedRowKeys.length === 0) {
-            message.warning('请选择要删除的仓库');
-            return;
-        }
+        const DEBUG_ON = true;
+        const TAG = `${CLS_NAME}.confirmBatchDelete() - `;
+
         this.setState({ loading: true });
+
         try {
+            // 获取选中记录的ID列表
+            const ids = this.getCurrentDataSource()
+                .filter(item => selectedRowKeys.includes(item.key))
+                .map(item => parseInt(item.id, 10));
+
+            DEBUG_ON && console.log(TAG, `准备删除的IDs:`, ids);
+
+            if (ids.length === 0) {
+                message.warning('未找到要删除的仓库ID');
+                this.setState({ loading: false });
+                return;
+            }
+
             const params = {
                 token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
-                ids: selectedRowKeys.join(',')
+                ids: ids
             };
+
             const response = await httpUtil.post(WarehouseApi.BATCH_DEL, params);
+
+            DEBUG_ON && console.log(TAG, `response:`, response);
+
             if (response?.code === 200) {
-                await this.fetchWarehouseList();
-                message.success(`成功删除 ${selectedRowKeys.length} 个仓库`);
+                const sucResponse = response as SucResponse;
+                message.success(sucResponse.message || `成功删除 ${selectedRowKeys.length} 个仓库`);
+                // 清空选中状态
                 this.setState({ selectedRowKeys: [] });
+                // 刷新列表
+                await this.fetchWarehouseList();
             } else {
-                const errResponse = response as ErrResponse
+                const errResponse = response as ErrResponse;
                 message.error(errResponse?.errMsg || '批量删除失败');
             }
         } catch (error) {
             console.error('批量删除仓库API调用失败:', error);
-            message.error('网络请求失败');
+            message.error('网络请求失败，请稍后重试');
+        } finally {
+            this.setState({ loading: false });
         }
-        this.setState({ loading: false });
     };
 
     /** 导出数据 */
@@ -297,15 +228,16 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
         try {
             const params = {
                 token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
-                id: record.id,
+                id: parseInt(record.id, 10),
                 status: checked ? 1 : 0
             };
             const response = await httpUtil.post(WarehouseApi.UPDATE_STATUS, params);
             if (response?.code === 200) {
+                const sucResponse = response as SucResponse;
+                message.success(sucResponse.message || `已${checked ? '启用' : '停用'}`);
                 await this.fetchWarehouseList();
-                message.success(`已${checked ? '启用' : '停用'}`);
             } else {
-                const errResponse = response as ErrResponse
+                const errResponse = response as ErrResponse;
                 message.error(errResponse?.errMsg || '状态更新失败');
             }
         } catch (error) {
@@ -349,9 +281,8 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
                 // 编辑
                 const params = {
                     token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
-                    id: editingRecord.id,
+                    id: parseInt(editingRecord.id, 10),
                     name: modalFormData.warehouseName,
-                    code: modalFormData.warehouseCode,
                     address: modalFormData.warehouseAddress,
                     status: modalFormData.warehouseStatus,
                     supervisor: modalFormData.warehouseSupervisor,
@@ -365,9 +296,7 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
                 const params = {
                     token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
                     name: modalFormData.warehouseName,
-                    code: modalFormData.warehouseCode,
                     address: modalFormData.warehouseAddress,
-                    status: modalFormData.warehouseStatus,
                     supervisor: modalFormData.warehouseSupervisor,
                     department: modalFormData.supervisorDepartment,
                     phone: modalFormData.contactPhone,
@@ -377,11 +306,12 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
             }
 
             if (response?.code === 200) {
-                message.success(editingRecord ? '编辑成功' : '添加成功');
-                await this.fetchWarehouseList();
+                const sucResponse = response as SucResponse;
+                message.success(sucResponse.message || (editingRecord ? '编辑成功' : '添加成功'));
                 this.setState({
                     modalVisible: false,
                     modalLoading: false,
+                    editingRecord: null,
                     modalFormData: {
                         warehouseName: '',
                         warehouseCode: '',
@@ -393,8 +323,9 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
                         remark: '',
                     }
                 });
+                await this.fetchWarehouseList();
             } else {
-                const errResponse = response as ErrResponse
+                const errResponse = response as ErrResponse;
                 message.error(errResponse?.errMsg || '操作失败');
                 this.setState({ modalLoading: false });
             }
@@ -421,7 +352,33 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
     /** 获取仓库列表 */
     fetchWarehouseList = async () => {
         const { getWarehouseList } = this.props;
-        getWarehouseList && getWarehouseList();
+        if (getWarehouseList) {
+            await getWarehouseList();
+        }
+    };
+
+    /** 获取当前数据源 */
+    getCurrentDataSource = (): WarehouseRecord[] => {
+        const { warehouseList } = this.props;
+        if (warehouseList && warehouseList.length > 0) {
+            return warehouseList.map((item, index) => ({
+                key: `${item.id || index + 1}`,
+                id: `${item.id}`,
+                warehouseName: item.name,
+                warehouseCode: item.code,
+                warehouseAddress: item.address,
+                warehouseStatus: item.status,
+                statusText: item.status === 1 ? '启用' : '停用',
+                subWarehouse: '关联子表',
+                warehouseSupervisor: item.supervisor,
+                supervisorDepartment: item.department,
+                contactPhone: item.phone,
+                submitter: item.submitter || '',
+                submitTime: item.createTime || '',
+                remark: item.remark || '',
+            }));
+        }
+        return [...this.warehouseData];
     };
 
     /** 表格列定义 */
@@ -469,17 +426,6 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
                 />
             ),
         },
-        // {
-        //     title: '关联子表',
-        //     dataIndex: 'subWarehouse',
-        //     key: 'subWarehouse',
-        //     width: 100,
-        //     render: (text) => (
-        //         <Button type="link" size="small" style={{ padding: 0 }}>
-        //             {text || '关联子表'}
-        //         </Button>
-        //     ),
-        // },
         {
             title: '仓库主管',
             dataIndex: 'warehouseSupervisor',
@@ -510,47 +456,47 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
             key: 'submitTime',
             width: 160,
         },
-        // {
-        //     title: '操作',
-        //     key: 'action',
-        //     width: 120,
-        //     fixed: 'right',
-        //     render: (_, record) => (
-        //         <Space size="small">
-        //             <Tooltip title="编辑">
-        //                 <Button
-        //                     type="link"
-        //                     size="small"
-        //                     icon={<EditOutlined />}
-        //                     onClick={() => this.handleEdit(record)}
-        //                 />
-        //             </Tooltip>
-        //             <Tooltip title="查看">
-        //                 <Button
-        //                     type="link"
-        //                     size="small"
-        //                     icon={<EyeOutlined />}
-        //                 />
-        //             </Tooltip>
-        //             <Popconfirm
-        //                 title="确认删除"
-        //                 description={`确定要删除仓库"${record.warehouseName}"吗？`}
-        //                 onConfirm={() => this.handleDelete(record)}
-        //                 okText="确定"
-        //                 cancelText="取消"
-        //             >
-        //                 <Tooltip title="删除">
-        //                     <Button
-        //                         type="link"
-        //                         size="small"
-        //                         danger
-        //                         icon={<DeleteOutlined />}
-        //                     />
-        //                 </Tooltip>
-        //             </Popconfirm>
-        //         </Space>
-        //     ),
-        // },
+        {
+            title: '操作',
+            key: 'action',
+            width: 120,
+            fixed: 'right',
+            render: (_, record) => (
+                <Space size="small">
+                    <Tooltip title="编辑">
+                        <Button
+                            type="link"
+                            size="small"
+                            icon={<EditOutlined />}
+                            onClick={() => this.handleEdit(record)}
+                        />
+                    </Tooltip>
+                    <Tooltip title="查看">
+                        <Button
+                            type="link"
+                            size="small"
+                            icon={<EyeOutlined />}
+                        />
+                    </Tooltip>
+                    <Popconfirm
+                        title="确认删除"
+                        description={`确定要删除仓库"${record.warehouseName}"吗？`}
+                        onConfirm={() => this.handleDelete(record)}
+                        okText="确定"
+                        cancelText="取消"
+                    >
+                        <Tooltip title="删除">
+                            <Button
+                                type="link"
+                                size="small"
+                                danger
+                                icon={<DeleteOutlined />}
+                            />
+                        </Tooltip>
+                    </Popconfirm>
+                </Space>
+            ),
+        },
     ];
 
     /** 行选择变化 */
@@ -586,30 +532,8 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
             onChange: this.onSelectChange,
         };
 
-        // 获取数据（优先使用 props，若无则使用静态数据）
-        const { warehouseList } = this.props;
-        let sourceData: WarehouseRecord[] = [];
-
-        if (warehouseList && warehouseList.length > 0) {
-            sourceData = warehouseList.map((item, index) => ({
-                key: `${item.id || index + 1}`,
-                id: `${item.id}`,
-                warehouseName: item.name,
-                warehouseCode: item.code,
-                warehouseAddress: item.address,
-                warehouseStatus: item.status,
-                statusText: item.status === 1 ? '启用' : '停用',
-                subWarehouse: '关联子表',
-                warehouseSupervisor: item.supervisor,
-                supervisorDepartment: item.department,
-                contactPhone: item.phone,
-                submitter: item.submitter || '',
-                submitTime: item.createTime || '',
-                remark: item.remark || '',
-            }));
-        } else {
-            sourceData = [...this.warehouseData];
-        }
+        // 获取数据源
+        const sourceData = this.getCurrentDataSource();
 
         // 过滤数据
         let filteredData = [...sourceData];
@@ -644,7 +568,7 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
             },
             onShowSizeChange: (current, size) => {
                 this.setState({
-                    currentPage: current,
+                    currentPage: 1,
                     pageSize: size,
                 });
                 setTimeout(() => this.updateTableScrollY(), 0);
@@ -673,9 +597,23 @@ class _Warehouse extends React.Component<WithTranslation & WarehouseProps> {
                         <Button icon={<HistoryOutlined />} onClick={this.handleOperationRecord}>
                             操作记录
                         </Button>
-                        <Button icon={<DeleteOutlined />} onClick={this.handleBatchDelete} danger>
-                            批量删除
-                        </Button>
+                        <Popconfirm
+                            title="确认批量删除"
+                            description={`确定要删除选中的 ${selectedRowKeys.length} 个仓库吗？`}
+                            onConfirm={this.confirmBatchDelete}
+                            okText="确定"
+                            cancelText="取消"
+                            disabled={selectedRowKeys.length === 0}
+                            okButtonProps={{ danger: true }}
+                        >
+                            <Button
+                                danger
+                                icon={<DeleteOutlined />}
+                                disabled={selectedRowKeys.length === 0}
+                            >
+                                批量删除
+                            </Button>
+                        </Popconfirm>
                     </Space>
                     <Space>
                         <Search
