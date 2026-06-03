@@ -150,7 +150,7 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
         }
         else if ((response?.code == 400)) {
             const r = response as ErrResponse
-            console.error(`获取岗位列表失败: [${r.errCode}] ${r.errMsg}`);
+            console.error(`[${r.errCode}] ${r.errMsg}`);
             httpUtil.tryGotoLogin(r);
         }
     }
@@ -185,7 +185,9 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
                 }
                 this.setState({ productSpecList: psList })
             } else {
-                // throw new Error(response.message || '获取产品属性列表失败');
+                const r = response as ErrResponse
+                console.error(`[${r.errCode}] ${r.errMsg}`);
+                httpUtil.tryGotoLogin(r);
             }
         } catch (error) {
             console.error('获取产品规格列表失败:', error);
@@ -223,7 +225,9 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
                 }
                 this.setState({ productUnitList: psList })
             } else {
-                // throw new Error(response.message || '获取产品属性列表失败');
+                const r = response as ErrResponse
+                console.error(`[${r.errCode}] ${r.errMsg}`);
+                httpUtil.tryGotoLogin(r);
             }
         } catch (error) {
             console.error('获取产品规单位列表失败:', error);
@@ -263,7 +267,9 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
                 }
                 this.setState({ productPropertyList: ppList })
             } else {
-                // throw new Error(response.message || '获取产品属性列表失败');
+                const r = response as ErrResponse
+                console.error(`[${r.errCode}] ${r.errMsg}`);
+                httpUtil.tryGotoLogin(r);
             }
         } catch (error) {
             console.error('获取产品属性列表失败:', error);
@@ -307,7 +313,9 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
                 }
                 this.setState({ warehouseList: whList })
             } else {
-                // throw new Error(response.message || '获取仓库列表失败');
+                const r = response as ErrResponse
+                console.error(`[${r.errCode}] ${r.errMsg}`);
+                httpUtil.tryGotoLogin(r);
             }
         } catch (error) {
             console.error('获取仓库列表失败:', error);

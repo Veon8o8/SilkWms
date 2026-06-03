@@ -60,32 +60,7 @@ class _ProductUnit extends React.Component<
     };
 
     // 产品单位数据 - 这是统计卡片的数据来源
-    unitData: ProductUnitRecord[] = [
-        {
-            key: '1',
-            id: 'unit_001',
-            name: '千克',
-            sortOrder: 1,
-            status: 'active',
-            createTime: '2024-01-15 10:30:00',
-        },
-        {
-            key: '2',
-            id: 'unit_002',
-            name: '个',
-            sortOrder: 2,
-            status: 'active',
-            createTime: '2024-01-15 10:30:00',
-        },
-        {
-            key: '3',
-            id: 'unit_003',
-            name: '包',
-            sortOrder: 3,
-            status: 'active',
-            createTime: '2024-01-15 10:30:00',
-        }
-    ];
+    unitData: ProductUnitRecord[] = [];
 
     // 添加产品单位
     handleAdd = () => {
@@ -230,8 +205,8 @@ class _ProductUnit extends React.Component<
                 });
 
                 if (response?.code === 200) {
-                    const sucResponse = response as SucResponse;
-                    message.success(sucResponse.message || '编辑产品单位成功');
+                    const r = response as SucResponse;
+                    message.success(r.message || '编辑产品单位成功');
 
                     // 更新本地数据（可选，提升用户体验）
                     const index = this.unitData.findIndex(item => item.id === editingRecord.id);
@@ -243,8 +218,10 @@ class _ProductUnit extends React.Component<
                         };
                     }
                 } else {
-                    const errResponse = response as ErrResponse;
-                    message.error(errResponse?.errMsg || '编辑失败');
+                    const r = response as ErrResponse;
+                    message.error(r?.errMsg || '编辑失败');
+                    console.error(`[${r.errCode}] ${r.errMsg}`);
+                    httpUtil.tryGotoLogin(r);
                     return;
                 }
             } else {
@@ -260,6 +237,8 @@ class _ProductUnit extends React.Component<
                 } else {
                     const errResponse = response as ErrResponse;
                     message.error(errResponse?.errMsg || '添加失败');
+                    console.error(`[${errResponse.errCode}] ${errResponse.errMsg}`);
+                    httpUtil.tryGotoLogin(errResponse);
                     return;
                 }
             }

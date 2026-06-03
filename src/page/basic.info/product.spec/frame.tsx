@@ -13,6 +13,7 @@ import {
     message,
     Popconfirm,
     ConfigProvider,
+    Modal,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -136,37 +137,69 @@ class _ProductSpec extends React.Component<
             if (response?.code === 200) {
                 await this.fetchProductSpecList()
                 let result = response as SucResponse
+                message.success(result.message || '删除成功');
                 console.log(TAG, result.message)
             } else {
                 let result = response as ErrResponse
+                message.error(result.errMsg || '删除失败');
                 console.error('删除产品规格失败:', result.errMsg);
             }
         }
         catch (error) {
             console.error('删除产品规格API调用失败:', error);
+            message.error('网络请求失败，请稍后重试');
         }
         this.setState({ loading: false, selectedRowKeys: [] });
     };
 
-    // 批量删除
-    handleBatchDelete = async () => {
+    // 批量删除 - 使用 Popconfirm 确认后调用服务器接口
+    confirmBatchDelete = async () => {
         const { selectedRowKeys } = this.state;
-        if (selectedRowKeys.length === 0) {
-            message.warning('请选择要删除的产品规格');
-            return;
-        }
+        const DEBUG_ON = true;
+        const TAG = `${CLS_NAME}.confirmBatchDelete() - `;
 
         this.setState({ loading: true });
-        await new Promise((resolve) => setTimeout(resolve, 500));
 
-        const newData = this.specData.filter(
-            (item) => !selectedRowKeys.includes(item.key)
-        );
-        this.specData.length = 0;
-        this.specData.push(...newData);
+        try {
+            // 获取选中记录的ID列表
+            const ids = this.specData
+                .filter(item => selectedRowKeys.includes(item.key))
+                .map(item => parseInt(item.id, 10));
 
-        message.success(`成功删除 ${selectedRowKeys.length} 个产品规格`);
-        this.setState({ loading: false, selectedRowKeys: [] });
+            DEBUG_ON && console.log(TAG, `准备删除的IDs:`, ids);
+
+            if (ids.length === 0) {
+                message.warning('未找到要删除的规格ID');
+                this.setState({ loading: false });
+                return;
+            }
+
+            const params = {
+                token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+                ids: ids
+            };
+
+            const response = await httpUtil.post(ProductSpecApi.BATCH_DEL, params);
+
+            DEBUG_ON && console.log(TAG, `response:`, response);
+
+            if (response?.code === 200) {
+                const result = response as SucResponse;
+                message.success(result.message || `成功删除 ${selectedRowKeys.length} 个产品规格`);
+                // 清空选中状态
+                this.setState({ selectedRowKeys: [] });
+                // 刷新列表
+                await this.fetchProductSpecList();
+            } else {
+                const result = response as ErrResponse;
+                message.error(result.errMsg || '批量删除失败');
+            }
+        } catch (error) {
+            console.error('批量删除产品规格API调用失败:', error);
+            message.error('网络请求失败，请稍后重试');
+        } finally {
+            this.setState({ loading: false });
+        }
     };
 
     // 保存产品规格（添加/编辑）
@@ -185,28 +218,21 @@ class _ProductSpec extends React.Component<
             if (editingRecord) {
                 // 编辑：调用编辑接口
                 const response = await this.updateProductSpec({
-                    id: parseInt(editingRecord.key),
+                    id: parseInt(editingRecord.id, 10),
                     name: formData.name,
                     icon: formData.icon,
                     color: formData.color,
                     sortOrder: formData.sortOrder
                 });
 
-                if (response.success) {
-                    // 更新本地数据
-                    const index = this.specData.findIndex(item => item.key === editingRecord.key);
-                    if (index !== -1) {
-                        this.specData[index] = {
-                            ...editingRecord,
-                            name: formData.name,
-                            sortOrder: formData.sortOrder,
-                        };
-                    }
-                    message.success('编辑产品规格成功');
+                if (response?.code === 200) {
+                    const sucResponse = response as SucResponse;
+                    message.success(sucResponse.message || '编辑产品规格成功');
                     // 重新获取列表
                     await this.fetchProductSpecList();
                 } else {
-                    message.error(response.message || '编辑失败');
+                    const errResponse = response as ErrResponse;
+                    message.error(errResponse?.errMsg || '编辑失败');
                     this.setState({ loading: false });
                     return;
                 }
@@ -219,12 +245,14 @@ class _ProductSpec extends React.Component<
                     sortOrder: formData.sortOrder
                 });
 
-                if (response.success) {
-                    message.success('添加产品规格成功');
+                if (response?.code === 200) {
+                    const sucResponse = response as SucResponse;
+                    message.success(sucResponse.message || '添加产品规格成功');
                     // 重新获取列表
                     await this.fetchProductSpecList();
                 } else {
-                    message.error(response.message || '添加失败');
+                    const errResponse = response as ErrResponse;
+                    message.error(errResponse?.errMsg || '添加失败');
                     this.setState({ loading: false });
                     return;
                 }
@@ -234,6 +262,7 @@ class _ProductSpec extends React.Component<
             this.setState({
                 loading: false,
                 modalVisible: false,
+                editingRecord: null,
                 formData: {
                     name: '',
                     icon: 'AppstoreOutlined',
@@ -272,26 +301,12 @@ class _ProductSpec extends React.Component<
 
             DEBUG_ON && console.log(TAG, `response:\n`, response)
 
-            if (response?.code === 200) {
-                let result = response as SucResponse
-                return {
-                    success: true,
-                    data: result.data,
-                    message: result.message
-                };
-            } else {
-                let result = response as ErrResponse
-                return {
-                    success: false,
-                    data: null,
-                    message: result.errMsg
-                };
-            }
+            return response;
         } catch (error) {
             console.error('添加产品规格API调用失败:', error);
             return {
-                success: false,
-                message: '网络请求失败'
+                code: 500,
+                errMsg: error instanceof Error ? error.message : '网络请求失败'
             };
         }
     };
@@ -322,26 +337,12 @@ class _ProductSpec extends React.Component<
 
             DEBUG_ON && console.log(TAG, `response:\n`, response)
 
-            if (response?.code === 200) {
-                let result = response as SucResponse
-                return {
-                    success: true,
-                    data: result.data,
-                    message: result.message
-                };
-            } else {
-                let result = response as ErrResponse
-                return {
-                    success: false,
-                    data: null,
-                    message: result.errMsg
-                };
-            }
+            return response;
         } catch (error) {
             console.error('编辑产品规格API调用失败:', error);
             return {
-                success: false,
-                message: '网络请求失败'
+                code: 500,
+                errMsg: error instanceof Error ? error.message : '网络请求失败'
             };
         }
     };
@@ -458,6 +459,7 @@ class _ProductSpec extends React.Component<
             modalVisible,
             modalTitle,
             formData,
+            selectedRowKeys,
         } = this.state;
 
         return (
@@ -494,6 +496,8 @@ class _ProductSpec extends React.Component<
 
     /** 操作栏 */
     renderOpBar() {
+        const { selectedRowKeys } = this.state;
+
         return (
             <div className="product-spec-actions">
                 <Space wrap size="middle">
@@ -504,13 +508,23 @@ class _ProductSpec extends React.Component<
                     >
                         添加规格
                     </Button>
-                    <Button
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={this.handleBatchDelete}
+                    <Popconfirm
+                        title="确认批量删除"
+                        description={`确定要删除选中的 ${selectedRowKeys.length} 个产品规格吗？`}
+                        onConfirm={this.confirmBatchDelete}
+                        okText="确定"
+                        cancelText="取消"
+                        disabled={selectedRowKeys.length === 0}
+                        okButtonProps={{ danger: true }}
                     >
-                        批量删除
-                    </Button>
+                        <Button
+                            danger
+                            icon={<DeleteOutlined />}
+                            disabled={selectedRowKeys.length === 0}
+                        >
+                            批量删除
+                        </Button>
+                    </Popconfirm>
                 </Space>
                 <Space>
                     <Search
