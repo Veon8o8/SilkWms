@@ -1,4 +1,4 @@
-// src/page/basic.info/product/product.info.modal.tsx
+// src/page/basic.info/product.info/product.info.modal.tsx
 // 产品信息弹框组件（添加/编辑产品）
 
 import React from 'react';

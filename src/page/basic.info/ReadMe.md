@@ -7,3 +7,5 @@
 3. 产品属性 (ProductProperty): [product.property](./product.property/ReadMe.md)
 
 4. 产品信息 (ProductInfo): [product.info](./product.info/ReadMe.md)
+
+5. 仓库信息 (WarehouseInfo): [warehouse.info](./warehouse.info/ReadMe.md)

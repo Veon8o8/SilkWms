@@ -165,3 +165,31 @@ export interface ProductUnitType {
     /** 更新时间，格式：YYYY-MM-DD HH:mm:ss */
     updateTime: string;
 }
+
+// 仓库类型
+export interface WarehouseType {
+    /** 仓库ID */
+    id: number;
+    /** 仓库名称 */
+    name: string;
+    /** 仓库编码 */
+    code: string;
+    /** 仓库地址 */
+    address: string;
+    /** 状态：1-启用，0-停用 */
+    status: number;
+    /** 仓库主管 */
+    supervisor: string;
+    /** 库管归属部门 */
+    department: string;
+    /** 联系电话 */
+    phone: string;
+    /** 提交人 */
+    submitter?: string;
+    /** 创建时间 */
+    createTime?: string;
+    /** 更新时间 */
+    updateTime?: string;
+    /** 备注 */
+    remark?: string;
+}

@@ -12,14 +12,15 @@ import { MENU_KEY } from '../config/sider';
 import { strUtil } from '../utils/StrUtil';
 import { FrameHome } from '../page/home/frame';
 import { httpUtil } from '../utils/HttpUtil';
-import { DepartmentApi, PositionApi, ProductPropertyApi, ProductSpecApi, ProductUnitApi } from '../config/api';
+import { DepartmentApi, PositionApi, ProductPropertyApi, ProductSpecApi, ProductUnitApi, WarehouseApi } from '../config/api';
 import { LOCAL_STORAGE } from '../config/keys';
-import { DepartmentType, ErrResponse, PositionType, ProductPropertyType, ProductSpecType, ProductUnitType, SucResponse } from '../config/type';
+import { DepartmentType, ErrResponse, PositionType, ProductPropertyType, ProductSpecType, ProductUnitType, SucResponse, WarehouseType } from '../config/type';
 import { timeUtil } from '../utils/TimeUtil';
 import { ProductInfo } from '../page/basic.info/product.info/frame';
 import { ProductProperty } from '../page/basic.info/product.property/frame';
 import { ProductSpec } from '../page/basic.info/product.spec/frame';
 import { ProductUnit } from '../page/basic.info/product.unit/frame';
+import { Warehouse } from '../page/basic.info/warehouse.info/frame';
 const { Content } = Layout;
 
 type MenuMode = 'vertical' | 'inline';
@@ -43,6 +44,7 @@ interface MainFrameState {
     productSpecList: ProductSpecType[],
     productUnitList: ProductUnitType[],
     productPropertyList: ProductPropertyType[],
+    warehouseList: WarehouseType[],
 }
 
 class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainFrameState> {
@@ -78,6 +80,7 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
             productSpecList: [],
             productUnitList: [],
             productPropertyList: [],
+            warehouseList: [],
         };
     }
 
@@ -86,6 +89,9 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
         this.fetchDepartment();
         this.fetchPosition();
         this.getProductPropertyList();
+        this.getProductSpecList();
+        this.getProductUnitList();
+        this.getWarehouseList();
     }
 
     private async fetchDepartment() {
@@ -265,6 +271,50 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
         }
     }
 
+    private getWarehouseList = async () => {
+        const TAG = `getWarehouseList() - `
+        try {
+            // 构建请求参数
+            const params = {
+                token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+            }
+
+            // 发送请求
+            const response = await httpUtil.post(WarehouseApi.LIST, params);
+
+            console.log(TAG, `response:\n`, response)
+
+            if (response?.code === 200) {
+                let result = response as SucResponse
+                let list = result.data.list;
+                let whList: WarehouseType[] = []
+                for (let i = 0; i < list.length; i++) {
+                    const e = list[i];
+                    whList.push({
+                        id: e.id,
+                        name: e.name,                    // 仓库名称
+                        code: e.code,                    // 仓库编码
+                        address: e.address,              // 仓库地址
+                        status: e.status,                // 状态：1-启用，0-停用
+                        supervisor: e.supervisor,        // 仓库主管
+                        department: e.department,        // 库管归属部门
+                        phone: e.phone,                  // 联系电话
+                        submitter: e.submitter,          // 提交人
+                        createTime: timeUtil.formatTimestamp(e.createTime),
+                        updateTime: timeUtil.formatTimestamp(e.updateTime),
+                        remark: e.remark,                // 备注
+                    })
+                }
+                this.setState({ warehouseList: whList })
+            } else {
+                // throw new Error(response.message || '获取仓库列表失败');
+            }
+        } catch (error) {
+            console.error('获取仓库列表失败:', error);
+            throw error;
+        }
+    }
+
     render() {
         const { headerHeight, bodyHeight, colorBgContainer, borderRadiusLG } = this.props
 
@@ -323,6 +373,14 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
                         <ProductInfo
                             headerHeight={headerHeight}
                             productPropertyList={this.state.productPropertyList}
+                        />
+                    )
+                case MENU_KEY.WarehouseInfo:
+                    return (
+                        <Warehouse
+                            headerHeight={headerHeight}
+                            warehouseList={this.state.warehouseList}
+                            getWarehouseList={this.getWarehouseList}
                         />
                     )
                 case MENU_KEY.StorageStats:

@@ -27,9 +27,6 @@ import {
     EditOutlined,
     EyeOutlined,
     AppstoreOutlined,
-    DatabaseOutlined,
-    ToolOutlined,
-    ScheduleOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import '../../../css/basic.info/product.info/frame.css';

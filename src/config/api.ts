@@ -133,7 +133,7 @@ export const ProductSpecApi = {
     ACTIVE_LIST: `${URL}/wms/product-spec/active-list`,
 }
 
-// 产品单位API
+/** 产品单位API */
 export const ProductUnitApi = {
     ADD: `${URL}/wms/product-unit/add`,
     DEL: `${URL}/wms/product-unit/del`,
@@ -144,4 +144,26 @@ export const ProductUnitApi = {
     UPDATE_STATUS: `${URL}/wms/product-unit/update-status`,
     UPDATE_SORT: `${URL}/wms/product-unit/update-sort`,
     ACTIVE_LIST: `${URL}/wms/product-unit/active-list`,
+}
+
+// 仓库管理API
+export const WarehouseApi = {
+    /** 添加仓库: /wms/warehouse/add */
+    ADD: `${URL}/wms/warehouse/add`,
+    /** 删除仓库: /wms/warehouse/del */
+    DEL: `${URL}/wms/warehouse/del`,
+    /** 批量删除仓库: /wms/warehouse/batch-del */
+    BATCH_DEL: `${URL}/wms/warehouse/batch-del`,
+    /** 编辑仓库: /wms/warehouse/edit */
+    EDIT: `${URL}/wms/warehouse/edit`,
+    /** 获取仓库列表: /wms/warehouse/list */
+    LIST: `${URL}/wms/warehouse/list`,
+    /** 获取仓库详情: /wms/warehouse/detail */
+    DETAIL: `${URL}/wms/warehouse/detail`,
+    /** 更新仓库状态: /wms/warehouse/update-status */
+    UPDATE_STATUS: `${URL}/wms/warehouse/update-status`,
+    /** 更新仓库排序: /wms/warehouse/update-sort */
+    UPDATE_SORT: `${URL}/wms/warehouse/update-sort`,
+    /** 获取启用的仓库: /wms/warehouse/active-list */
+    ACTIVE_LIST: `${URL}/wms/warehouse/active-list`,
 }
