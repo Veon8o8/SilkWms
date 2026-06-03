@@ -115,117 +115,172 @@ class _ProductUnit extends React.Component<
 
     // 删除产品单位
     handleDelete = async (record: ProductUnitRecord) => {
-        const DEBUG_ON = true
-        const TAG = `${CLS_NAME}.handleDelete() - `
+        const DEBUG_ON = true;
+        const TAG = `${CLS_NAME}.handleDelete() - `;
         this.setState({ loading: true });
         try {
             const params = {
                 token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
                 id: record.id
-            }
+            };
 
             const response = await httpUtil.post(ProductUnitApi.DEL, params);
 
-            DEBUG_ON && console.log(TAG, `response:\n`, response)
+            DEBUG_ON && console.log(TAG, `response:\n`, response);
 
             if (response?.code === 200) {
-                await this.fetchProductUnitList()
-                let result = response as SucResponse
-                console.log(TAG, result.message)
+                await this.fetchProductUnitList();
+                let result = response as SucResponse;
+                message.success(result.message || '删除成功');
+                console.log(TAG, result.message);
             } else {
-                let result = response as ErrResponse
+                let result = response as ErrResponse;
+                message.error(result.errMsg || '删除失败');
                 console.error('删除产品单位失败:', result.errMsg);
             }
-        }
-        catch (error) {
+        } catch (error) {
             console.error('删除产品单位API调用失败:', error);
+            message.error('网络请求失败，请稍后重试');
         }
         this.setState({ loading: false, selectedRowKeys: [] });
     };
 
-    // 批量删除
-    handleBatchDelete = async () => {
+    // 批量删除 - 使用 Popconfirm 确认
+    confirmBatchDelete = async () => {
         const { selectedRowKeys } = this.state;
-        if (selectedRowKeys.length === 0) {
-            message.warning('请选择要删除的产品单位');
-            return;
-        }
+        const DEBUG_ON = true;
+        const TAG = `${CLS_NAME}.confirmBatchDelete() - `;
 
         this.setState({ loading: true });
-        await new Promise((resolve) => setTimeout(resolve, 500));
 
-        const newData = this.unitData.filter(
-            (item) => !selectedRowKeys.includes(item.key)
-        );
-        this.unitData.length = 0;
-        this.unitData.push(...newData);
+        try {
+            // 获取选中记录的ID列表
+            const ids = this.unitData
+                .filter(item => selectedRowKeys.includes(item.key))
+                .map(item => parseInt(item.id, 10));
 
-        message.success(`成功删除 ${selectedRowKeys.length} 个产品单位`);
-        this.setState({ loading: false, selectedRowKeys: [] });
+            DEBUG_ON && console.log(TAG, `准备删除的IDs:`, ids);
+
+            if (ids.length === 0) {
+                message.warning('未找到要删除的单位ID');
+                this.setState({ loading: false });
+                return;
+            }
+
+            const params = {
+                token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+                ids: ids
+            };
+
+            const response = await httpUtil.post(ProductUnitApi.BATCH_DEL, params);
+
+            DEBUG_ON && console.log(TAG, `response:`, response);
+
+            if (response?.code === 200) {
+                const result = response as SucResponse;
+                message.success(result.message || `成功删除 ${selectedRowKeys.length} 个产品单位`);
+                // 清空选中状态
+                this.setState({ selectedRowKeys: [] });
+                // 刷新列表
+                await this.fetchProductUnitList();
+            } else {
+                const result = response as ErrResponse;
+                message.error(result.errMsg || '批量删除失败');
+            }
+        } catch (error) {
+            console.error('批量删除产品单位API调用失败:', error);
+            message.error('网络请求失败，请稍后重试');
+        } finally {
+            this.setState({ loading: false });
+        }
     };
 
     // 保存产品单位（添加/编辑）
     handleSave = async () => {
         const { formData, editingRecord } = this.state;
 
+        // 表单验证
         if (!formData.name.trim()) {
             message.warning('请输入产品单位名称');
+            return;
+        }
+
+        if (!formData.sortOrder && formData.sortOrder !== 0) {
+            message.warning('请输入排序序号');
+            return;
+        }
+
+        // 验证排序序号为正整数
+        if (formData.sortOrder < 0) {
+            message.warning('排序序号不能为负数');
             return;
         }
 
         this.setState({ loading: true });
 
         try {
+            let response;
+
             if (editingRecord) {
-                const response = await this.updateProductUnit({
-                    id: parseInt(editingRecord.key),
-                    name: formData.name,
+                // 编辑模式：调用编辑接口
+                response = await this.updateProductUnit({
+                    id: parseInt(editingRecord.id, 10),
+                    name: formData.name.trim(),
                     sortOrder: formData.sortOrder
                 });
 
-                if (response.success) {
-                    const index = this.unitData.findIndex(item => item.key === editingRecord.key);
+                if (response?.code === 200) {
+                    const sucResponse = response as SucResponse;
+                    message.success(sucResponse.message || '编辑产品单位成功');
+
+                    // 更新本地数据（可选，提升用户体验）
+                    const index = this.unitData.findIndex(item => item.id === editingRecord.id);
                     if (index !== -1) {
                         this.unitData[index] = {
-                            ...editingRecord,
-                            name: formData.name,
+                            ...this.unitData[index],
+                            name: formData.name.trim(),
                             sortOrder: formData.sortOrder,
                         };
                     }
-                    message.success('编辑产品单位成功');
-                    await this.fetchProductUnitList();
                 } else {
-                    message.error(response.message || '编辑失败');
-                    this.setState({ loading: false });
+                    const errResponse = response as ErrResponse;
+                    message.error(errResponse?.errMsg || '编辑失败');
                     return;
                 }
             } else {
-                const response = await this.addProductUnit({
-                    name: formData.name,
+                // 添加模式：调用添加接口
+                response = await this.addProductUnit({
+                    name: formData.name.trim(),
                     sortOrder: formData.sortOrder
                 });
 
-                if (response.success) {
-                    message.success('添加产品单位成功');
-                    await this.fetchProductUnitList();
+                if (response?.code === 200) {
+                    const sucResponse = response as SucResponse;
+                    message.success(sucResponse.message || '添加产品单位成功');
                 } else {
-                    message.error(response.message || '添加失败');
-                    this.setState({ loading: false });
+                    const errResponse = response as ErrResponse;
+                    message.error(errResponse?.errMsg || '添加失败');
                     return;
                 }
             }
 
+            // 操作成功，关闭弹框、重置表单、刷新列表
             this.setState({
-                loading: false,
                 modalVisible: false,
+                editingRecord: null,
                 formData: {
                     name: '',
                     sortOrder: 1,
                 }
             });
+
+            // 刷新产品单位列表
+            await this.fetchProductUnitList();
+
         } catch (error) {
             console.error('保存产品单位失败:', error);
             message.error('网络错误，请稍后重试');
+        } finally {
             this.setState({ loading: false });
         }
     };
@@ -235,39 +290,27 @@ class _ProductUnit extends React.Component<
         name: string;
         sortOrder: number;
     }) => {
-        const DEBUG_ON = true
-        const TAG = `${CLS_NAME}.addProductUnit() - `
+        const DEBUG_ON = true;
+        const TAG = `${CLS_NAME}.addProductUnit() - `;
+
         try {
             const params = {
                 token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
                 name: data.name,
                 sort_order: data.sortOrder
-            }
+            };
 
             const response = await httpUtil.post(ProductUnitApi.ADD, params);
 
-            DEBUG_ON && console.log(TAG, `response:\n`, response)
+            DEBUG_ON && console.log(TAG, `request params:`, params);
+            DEBUG_ON && console.log(TAG, `response:`, response);
 
-            if (response?.code === 200) {
-                let result = response as SucResponse
-                return {
-                    success: true,
-                    data: result.data,
-                    message: result.message
-                };
-            } else {
-                let result = response as ErrResponse
-                return {
-                    success: false,
-                    data: null,
-                    message: result.errMsg
-                };
-            }
+            return response;
         } catch (error) {
             console.error('添加产品单位API调用失败:', error);
             return {
-                success: false,
-                message: '网络请求失败'
+                code: 500,
+                errMsg: error instanceof Error ? error.message : '网络请求失败'
             };
         }
     };
@@ -278,48 +321,38 @@ class _ProductUnit extends React.Component<
         name: string;
         sortOrder: number;
     }) => {
-        const DEBUG_ON = true
-        const TAG = `${CLS_NAME}.updateProductUnit() - `
+        const DEBUG_ON = true;
+        const TAG = `${CLS_NAME}.updateProductUnit() - `;
+
         try {
             const params = {
                 token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
                 id: data.id,
                 name: data.name,
                 sort_order: data.sortOrder
-            }
+            };
 
             const response = await httpUtil.post(ProductUnitApi.EDIT, params);
 
-            DEBUG_ON && console.log(TAG, `response:\n`, response)
+            DEBUG_ON && console.log(TAG, `request params:`, params);
+            DEBUG_ON && console.log(TAG, `response:`, response);
 
-            if (response?.code === 200) {
-                let result = response as SucResponse
-                return {
-                    success: true,
-                    data: result.data,
-                    message: result.message
-                };
-            } else {
-                let result = response as ErrResponse
-                return {
-                    success: false,
-                    data: null,
-                    message: result.errMsg
-                };
-            }
+            return response;
         } catch (error) {
             console.error('编辑产品单位API调用失败:', error);
             return {
-                success: false,
-                message: '网络请求失败'
+                code: 500,
+                errMsg: error instanceof Error ? error.message : '网络请求失败'
             };
         }
     };
 
-    // 获取产品单位列表
+    // 获取产品单位列表（刷新数据）
     fetchProductUnitList = async () => {
         const { getProductUnitList } = this.props;
-        getProductUnitList && getProductUnitList();
+        if (getProductUnitList) {
+            await getProductUnitList();
+        }
     };
 
     // 取消模态框
@@ -425,6 +458,7 @@ class _ProductUnit extends React.Component<
             modalVisible,
             modalTitle,
             formData,
+            selectedRowKeys,
         } = this.state;
 
         return (
@@ -455,11 +489,13 @@ class _ProductUnit extends React.Component<
                     管理产品单位
                 </div>
             </div>
-        )
+        );
     }
 
     /** 操作栏 */
     renderOpBar() {
+        const { selectedRowKeys } = this.state;
+
         return (
             <div className="product-unit-actions">
                 <Space wrap size="middle">
@@ -470,13 +506,23 @@ class _ProductUnit extends React.Component<
                     >
                         添加单位
                     </Button>
-                    <Button
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={this.handleBatchDelete}
+                    <Popconfirm
+                        title="确认批量删除"
+                        description={`确定要删除选中的 ${selectedRowKeys.length} 个产品单位吗？`}
+                        onConfirm={this.confirmBatchDelete}
+                        okText="确定"
+                        cancelText="取消"
+                        disabled={selectedRowKeys.length === 0}
+                        okButtonProps={{ danger: true }}
                     >
-                        批量删除
-                    </Button>
+                        <Button
+                            danger
+                            icon={<DeleteOutlined />}
+                            disabled={selectedRowKeys.length === 0}
+                        >
+                            批量删除
+                        </Button>
+                    </Popconfirm>
                 </Space>
                 <Space>
                     <Search
@@ -489,7 +535,7 @@ class _ProductUnit extends React.Component<
                     />
                 </Space>
             </div>
-        )
+        );
     }
 
     /** 表格区域 */
@@ -507,7 +553,7 @@ class _ProductUnit extends React.Component<
         };
 
         const { productUnitList } = this.props;
-        this.unitData = []
+        this.unitData = [];
         for (let i = 0; i < productUnitList.length; i++) {
             const e = productUnitList[i];
             this.unitData.push({
@@ -517,7 +563,7 @@ class _ProductUnit extends React.Component<
                 sortOrder: e.sortOrder,
                 status: e.status == 1 ? 'active' : 'inactive',
                 createTime: e.createTime,
-            })
+            });
         }
 
         let filteredData = [...this.unitData];
@@ -576,7 +622,7 @@ class _ProductUnit extends React.Component<
                     />
                 </ConfigProvider>
             </div>
-        )
+        );
     }
 }
 

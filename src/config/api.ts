@@ -133,16 +133,73 @@ export const ProductSpecApi = {
     ACTIVE_LIST: `${URL}/wms/product-spec/active-list`,
 }
 
-/** 产品单位API */
+/**
+ * 产品单位API
+ * @description 提供产品单位管理模块的所有接口路径定义，用于前端调用后端服务
+ * @module ProductUnitApi
+ */
 export const ProductUnitApi = {
+    /** 
+     * 添加产品单位
+     * @description 用于创建新的产品单位，需要传入单位名称和排序序号
+     * @method POST
+     */
     ADD: `${URL}/wms/product-unit/add`,
+
+    /** 
+     * 删除产品单位
+     * @description 根据单位ID删除指定的产品单位，删除前会检查是否被引用
+     * @method POST
+     */
     DEL: `${URL}/wms/product-unit/del`,
+
+    /** 
+     * 批量删除产品单位
+     * @description 根据单位ID列表批量删除产品单位，提高操作效率
+     * @method POST
+     */
     BATCH_DEL: `${URL}/wms/product-unit/batch-del`,
+
+    /** 
+     * 编辑产品单位
+     * @description 修改产品单位信息，包括单位名称、排序序号、状态等
+     * @method POST
+     */
     EDIT: `${URL}/wms/product-unit/edit`,
+
+    /** 
+     * 获取产品单位列表
+     * @description 分页查询产品单位列表，支持按单位名称模糊搜索、按状态筛选
+     * @method POST
+     */
     LIST: `${URL}/wms/product-unit/list`,
+
+    /** 
+     * 获取产品单位详情
+     * @description 根据单位ID查询单个产品单位的完整信息
+     * @method POST
+     */
     DETAIL: `${URL}/wms/product-unit/detail`,
+
+    /** 
+     * 更新产品单位状态
+     * @description 启用或禁用产品单位，状态值：1-启用，0-禁用
+     * @method POST
+     */
     UPDATE_STATUS: `${URL}/wms/product-unit/update-status`,
+
+    /** 
+     * 更新产品单位排序
+     * @description 调整产品单位的显示顺序，数值越小越靠前
+     * @method POST
+     */
     UPDATE_SORT: `${URL}/wms/product-unit/update-sort`,
+
+    /** 
+     * 获取启用的产品单位列表
+     * @description 只返回状态为启用的产品单位，用于下拉选择框等组件
+     * @method POST
+     */
     ACTIVE_LIST: `${URL}/wms/product-unit/active-list`,
 }
 
